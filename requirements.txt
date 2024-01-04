@@ -1,0 +1,8 @@
+aiogram==2.23.1
+httpx==0.24.1
+openai==0.27.8
+pydub==0.25.1
+PyMySQL==1.0.2
+PyYAML==6.0.1
+SpeechRecognition==3.9.0
+wget==3.2
