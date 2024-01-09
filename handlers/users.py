@@ -24,12 +24,11 @@ async def start(message: types.Message, state: FSMContext):
 
     markup = await kb.start_kb()
     await message.answer(cfg.misc.messages.start, reply_markup=markup)
+    await state.finish()
     try:
         pass
     except:
         await message.message.answer(cfg.misc.messages.start, reply_markup=markup)
-
-    await state.finish()
 
 
 async def calculate_calory(message: types.Message, state: FSMContext):
@@ -186,6 +185,16 @@ async def wait_text(message: types.Message, state: FSMContext):
     await message.answer(result)
 
 
+async def back(callback: types.CallbackQuery, state: FSMContext):
+    cfg: Config = ctx_data.get()['config']
+    kb: Keyboards = ctx_data.get()['keyboards']
+    db: Database = ctx_data.get()['db']
+    data = await state.get_data()
+    markup = await kb.start_kb()
+    await callback.message.answer(cfg.misc.messages.start, reply_markup=markup)
+    await state.finish()
+
+
 def register_user_handlers(dp: Dispatcher, kb: Keyboards):
     dp.register_message_handler(start, commands=["start"], state="*")
     dp.register_message_handler(diary, regexp="Дневник", state="*")
@@ -203,7 +212,7 @@ def register_user_handlers(dp: Dispatcher, kb: Keyboards):
         confirm_settings, state="confirm settings")
     dp.register_callback_query_handler(
         add_record_to_diary, kb.add_calory_diary_cd.filter(), state="*")
-
+    dp.register_callback_query_handler(back, kb.back_kb.filter(), state="*")
     dp.register_message_handler(wait_photo,
                                 content_types=[types.ContentType.PHOTO,
                                                types.ContentTypes.PHOTO,
