@@ -59,7 +59,7 @@ async def add_record_to_diary(callback: types.CallbackQuery, state: FSMContext, 
     callory = callback_data.get("amount")
     food_data = FoodData(calories=callory)
     db.add_diary_record(callback.from_user.id, food_data)
-    amount_daily_calory = db.get_amount_daily_records()
+    amount_daily_calory = db.get_amount_daily_records(callback.from_user.id)
     user: User = db.get_user(callback.from_user.id)
 
     await callback.message.answer("Добавлено в дневник")
@@ -74,7 +74,7 @@ async def diary(message: types.Message, state: FSMContext):
     user: User = db.get_user(message.from_user.id)
     text = "<b><i>Ваши данные</i></b>:\n"
     await state.finish()
-    amount_daily_calory = db.get_amount_daily_records()
+    amount_daily_calory = db.get_amount_daily_records(message.from_user.id)
 
     result = text+user.__repr__()
     if amount_daily_calory > user.daily_calory:

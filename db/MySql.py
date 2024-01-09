@@ -118,11 +118,11 @@ class Database:
                 result.append(User(*user))
         return result
 
-    def get_amount_daily_records(self):
+    def get_amount_daily_records(self, telegram_id):
         self.connection.ping()
         with self.connection.cursor() as cursor:
             cursor.execute(
-                """SELECT * FROM Records WHERE date=%s""", (datetime.now().date()))
+                """SELECT * FROM Records WHERE date=%s and telegram_id=%s""", (datetime.now().date(), telegram_id))
             res = cursor.fetchall()
             result = 0
             for r in res:
