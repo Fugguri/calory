@@ -6,6 +6,6 @@ update:
 push:
 	git push
 
-ugrade:
+upgrade:
 	git pull
 	python3 main.py

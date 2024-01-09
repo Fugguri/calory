@@ -73,7 +73,7 @@ async def diary(message: types.Message, state: FSMContext):
     db: Database = ctx_data.get()['db']
     user: User = db.get_user(message.from_user.id)
     text = "<b><i>Ваши данные</i></b>:\n"
-    await state.finis()
+    await state.finish()
     amount_daily_calory = db.get_amount_daily_records()
 
     result = text+user.__repr__()
