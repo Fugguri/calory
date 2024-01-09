@@ -82,7 +82,7 @@ class Database:
             self.connection.commit()
             self.connection.close()
 
-    def add_user(self, promt):
+    def add_promt(self, promt):
         self.connection.ping()
         with self.connection.cursor() as cursor:
             cursor.execute("INSERT IGNORE INTO Promt (text) VALUES (%s) ",
