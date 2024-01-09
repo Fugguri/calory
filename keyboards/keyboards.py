@@ -30,11 +30,13 @@ class Keyboards:
         kb = InlineKeyboardMarkup()
         kb.add(InlineKeyboardButton(text="Добавить запись",
                callback_data=self.add_calory_diary_cd.new(amount=calory_amount)))
+        kb.add(InlineKeyboardButton(text="Неправильный подсчет грам",
+               callback_data=self.add_calory_diary_cd.new(amount=calory_amount)))
         return kb
 
     async def sex_kb(self):
         kb = InlineKeyboardMarkup()
-        kb.add(InlineKeyboardButton(text="Мужский",
+        kb.add(InlineKeyboardButton(text="Мужской",
                callback_data="Мужской"))
         kb.add(InlineKeyboardButton(text="Женский",
                callback_data="Женский"))
