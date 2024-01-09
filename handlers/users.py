@@ -190,9 +190,12 @@ def register_user_handlers(dp: Dispatcher, kb: Keyboards):
     dp.register_message_handler(start, commands=["start"], state="*")
     dp.register_message_handler(
         calculate_calory, regexp="Подсчет каллорий", state="*")
-    dp.register_message_handler(diary, regexp="Дневник", state="*")
-    dp.register_message_handler(payment, regexp="Оплата", state="*")
-    dp.register_message_handler(settings, regexp="Настройки", state="*")
+    dp.register_message_handler(
+        diary, lambda x: x.text == "Дневник", state="*")
+    dp.register_message_handler(
+        payment, lambda x: x.text == "Оплата", state="*")
+    dp.register_message_handler(
+        settings, lambda x: x.text == "Настройки", state="*")
     dp.register_message_handler(wait_height, state="wait height")
     dp.register_message_handler(wait_weight, state="wait weight")
     dp.register_message_handler(wait_age, state="wait age")
