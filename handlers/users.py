@@ -73,6 +73,7 @@ async def diary(message: types.Message, state: FSMContext):
     db: Database = ctx_data.get()['db']
     user: User = db.get_user(message.from_user.id)
     text = "<b><i>Ваши данные</i></b>:\n"
+
     amount_daily_calory = db.get_amount_daily_records()
 
     result = text+user.__repr__()
@@ -189,6 +190,8 @@ def register_user_handlers(dp: Dispatcher, kb: Keyboards):
     dp.register_message_handler(start, commands=["start"], state="*")
     dp.register_message_handler(
         calculate_calory, regexp="Подсчет каллорий", state="*")
+    dp.register_message_handler(diary, regexp="Дневник", state="*")
+    dp.register_message_handler(payment, regexp="Оплата", state="*")
     dp.register_message_handler(settings, regexp="Настройки", state="*")
     dp.register_message_handler(wait_height, state="wait height")
     dp.register_message_handler(wait_weight, state="wait weight")
@@ -200,9 +203,6 @@ def register_user_handlers(dp: Dispatcher, kb: Keyboards):
         confirm_settings, state="confirm settings")
     dp.register_callback_query_handler(
         add_record_to_diary, kb.add_calory_diary_cd.filter(), state="*")
-
-    dp.register_message_handler(diary, regexp="Дневник", state="*")
-    dp.register_message_handler(payment, regexp="Оплата", state="*")
 
     dp.register_message_handler(wait_photo,
                                 content_types=[types.ContentType.PHOTO,
