@@ -188,10 +188,10 @@ async def wait_text(message: types.Message, state: FSMContext):
 
 def register_user_handlers(dp: Dispatcher, kb: Keyboards):
     dp.register_message_handler(start, commands=["start"], state="*")
-    dp.register_message_handler(
-        calculate_calory, regexp="Подсчет каллорий", state="*")
     dp.register_message_handler(diary, regexp="Дневник", state="*")
     dp.register_message_handler(payment, regexp="Оплата", state="*")
+    dp.register_message_handler(
+        calculate_calory, regexp="Подсчет каллорий", state="*")
     dp.register_message_handler(settings, regexp="Настройки", state="*")
     dp.register_message_handler(wait_height, state="wait height")
     dp.register_message_handler(wait_weight, state="wait weight")
