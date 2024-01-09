@@ -212,7 +212,7 @@ def register_user_handlers(dp: Dispatcher, kb: Keyboards):
         confirm_settings, state="confirm settings")
     dp.register_callback_query_handler(
         add_record_to_diary, kb.add_calory_diary_cd.filter(), state="*")
-    dp.register_callback_query_handler(back, kb.back_kb.filter(), state="*")
+    dp.register_callback_query_handler(back, kb.back_cd.filter(), state="*")
     dp.register_message_handler(wait_photo,
                                 content_types=[types.ContentType.PHOTO,
                                                types.ContentTypes.PHOTO,
