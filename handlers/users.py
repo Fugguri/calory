@@ -66,6 +66,21 @@ async def add_record_to_diary(callback: types.CallbackQuery, state: FSMContext, 
         await callback.message.answer(f"Внимание!!!\nКалорий на сегодня уже достаточно.\n{amount_daily_calory}/{user.daily_calory}")
 
 
+async def add_record_to_errors(callback: types.CallbackQuery, state: FSMContext, callback_data: dict):
+    cfg: Config = ctx_data.get()['config']
+    kb: Keyboards = ctx_data.get()['keyboards']
+    db: Database = ctx_data.get()['db']
+    callory = callback_data.get("amount")
+    food_data = FoodData(calories=callory)
+    db.add_diary_record(callback.from_user.id, food_data)
+    amount_daily_calory = db.get_amount_daily_records(callback.from_user.id)
+    user: User = db.get_user(callback.from_user.id)
+
+    await callback.message.answer("Добавлено в дневник")
+    if amount_daily_calory > user.daily_calory:
+        await callback.message.answer(f"Внимание!!!\nКалорий на сегодня уже достаточно.\n{amount_daily_calory}/{user.daily_calory}")
+
+
 async def diary(message: types.Message, state: FSMContext):
     cfg: Config = ctx_data.get()['config']
     kb: Keyboards = ctx_data.get()['keyboards']
@@ -212,6 +227,8 @@ def register_user_handlers(dp: Dispatcher, kb: Keyboards):
         confirm_settings, state="confirm settings")
     dp.register_callback_query_handler(
         add_record_to_diary, kb.add_calory_diary_cd.filter(), state="*")
+    dp.register_callback_query_handler(
+        add_record_to_errors, kb.add_dish_to_error_list_cd.filter(), state="*")
     dp.register_callback_query_handler(back, kb.back_cd.filter(), state="*")
     dp.register_message_handler(wait_photo,
                                 content_types=[types.ContentType.PHOTO,

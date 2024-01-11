@@ -12,6 +12,7 @@ class Keyboards:
         self.admin_cd = CallbackData("mailing", "command")
         self.mailing_cd = CallbackData("admin", "command")
         self.add_calory_diary_cd = CallbackData("calory", "amount")
+        self.add_dish_to_error_list_cd = CallbackData("dish", "amount")
         self.back_cd = CallbackData("back", "role")
 
     async def start_kb(self):
@@ -31,7 +32,7 @@ class Keyboards:
         kb.add(InlineKeyboardButton(text="Добавить запись",
                callback_data=self.add_calory_diary_cd.new(amount=calory_amount)))
         kb.add(InlineKeyboardButton(text="Неправильный подсчет грам",
-               callback_data=self.add_calory_diary_cd.new(amount=calory_amount)))
+               callback_data=self.add_dish_to_error_list_cd.new(dish=calory_amount)))
         return kb
 
     async def sex_kb(self):
