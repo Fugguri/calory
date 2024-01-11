@@ -32,7 +32,7 @@ class Keyboards:
         kb.add(InlineKeyboardButton(text="Добавить запись",
                callback_data=self.add_calory_diary_cd.new(amount=calory_amount)))
         kb.add(InlineKeyboardButton(text="Неправильный подсчет грам",
-               callback_data=self.add_dish_to_error_list_cd.new(dish=calory_amount)))
+               callback_data=self.add_dish_to_error_list_cd.new(amount=calory_amount)))
         return kb
 
     async def sex_kb(self):

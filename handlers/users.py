@@ -43,6 +43,7 @@ async def wait_photo(message: types.Message, state: FSMContext):
     kb: Keyboards = ctx_data.get()['keyboards']
     path = await message.photo[0].download()
     result: str = await calculator.send_photo(path.name, message.caption)
+    print(result)
     food_data = extract_food_data(result)
     markup = await kb.back_kb("user")
     print(food_data.calories)
