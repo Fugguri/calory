@@ -76,7 +76,7 @@ async def add_record_to_errors(callback: types.CallbackQuery, state: FSMContext,
     amount_daily_calory = db.get_amount_daily_records(callback.from_user.id)
     user: User = db.get_user(callback.from_user.id)
 
-    await callback.message.answer("Добавлено в дневник")
+    await callback.message.answer("Данные об ошибке добавлены.")
     if amount_daily_calory > user.daily_calory:
         await callback.message.answer(f"Внимание!!!\nКалорий на сегодня уже достаточно.\n{amount_daily_calory}/{user.daily_calory}")
 
