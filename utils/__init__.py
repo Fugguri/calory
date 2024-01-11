@@ -36,8 +36,8 @@ def extract_food_data(text_message):
     protein_match = re.search(r'Белков: (.+)', text_message)
     carbs_match = re.search(r'Углеводов: (.+)', text_message)
     fats_match = re.search(r'Жиров: (.+)', text_message)
-    calories_match_1 = re.search(r'Калории: (\d+) ккал', text_message)
-    calories_match_2 = re.search(r'Калории: (\d+)-(\d+) ккал', text_message)
+    calories_match_1 = re.search(r'Калории: (\d+) ', text_message)
+    calories_match_2 = re.search(r'Калории: (\d+)-(\d+)', text_message)
     grams_match = re.search(r'Грамм: (.+)', text_message)
     average_calories = None
 
