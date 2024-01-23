@@ -32,13 +32,13 @@ def calculate_calories(settings: Settings):
 
 def extract_food_data(text_message):
     # Используем регулярные выражения для извлечения данных
-    dish_match = re.search(r'Блюдо: (.+)', text_message)
-    protein_match = re.search(r'Белков: (.+)', text_message)
-    carbs_match = re.search(r'Углеводов: (.+)', text_message)
-    fats_match = re.search(r'Жиров: (.+)', text_message)
+    dish_match = re.search(r'Блюдо: (\d+)', text_message)
+    protein_match = re.search(r'Белки: (\d+)', text_message)
+    carbs_match = re.search(r'Углеводы: (\d+)', text_message)
+    fats_match = re.search(r'Жиры: (\d+)', text_message)
     calories_match_1 = re.search(r'Калории: (\d+)', text_message)
     calories_match_2 = re.search(r'Калории: (\d+)-(\d+)', text_message)
-    grams_match = re.search(r'Грамм: (.+)', text_message)
+    grams_match = re.search(r'Грамм: (\d+)', text_message)
     average_calories = None
 
     if calories_match_2:
