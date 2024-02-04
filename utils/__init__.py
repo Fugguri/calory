@@ -1,3 +1,4 @@
+from .exelWriter import ExcelWriter
 import re
 from .channel_joined import *
 from .text_to_speech import *
@@ -62,7 +63,10 @@ def extract_food_data(text_message):
     return food_data
 
 
+exel_writer = ExcelWriter()
+
 __all__ = [
+    "exel_writer",
     "text_to_speech",
     'create_text',
     "on_process_message",

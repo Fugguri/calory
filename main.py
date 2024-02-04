@@ -10,6 +10,7 @@ from handlers.users import register_user_handlers
 from handlers.admin import register_admin_handlers
 
 from middlewares.environment import EnvironmentMiddleware
+from middlewares import SubscriptionMiddleware
 from aiogram import Bot, Dispatcher, executor, utils
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
 from aiogram.contrib.middlewares.logging import LoggingMiddleware
@@ -20,6 +21,7 @@ async def register_all_middlewares(dp, config, keyboards, db, openai, bot, ):
 
     dp.middleware.setup(EnvironmentMiddleware(
         config=config, db=db, keyboards=keyboards, openai=openai, bot=bot))
+    dp.middleware.setup(SubscriptionMiddleware())
 
 
 def register_all_handlers(dp, keyboards):

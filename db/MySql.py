@@ -1,4 +1,4 @@
-from datetime import datetime
+import datetime
 import pymysql
 from config import Config
 from models import *
@@ -25,13 +25,16 @@ class Database:
                         username TEXT,
                         has_access BOOL DEFAULT false,
                         role TEXT DEFAULT 'USER',
+                        free_diary_records INT DEFAULT 3,
                         weight INT,
                         height INT,
                         age INT,
                         sex TEXT,
                         activity TEXT,  
                         goal TEXT,
-                        daily_calory INT
+                        daily_calory INT,
+                        discount INT DEFAULT 0,
+                        subscription DATE
                         );"""
             cursor.execute(create)
             self.connection.commit()
@@ -57,22 +60,39 @@ class Database:
                         );"""
             cursor.execute(create)
             self.connection.commit()
+        with self.connection.cursor() as cursor:
+            create = """CREATE TABLE IF NOT EXISTS Promo
+                        (id INT PRIMARY KEY AUTO_INCREMENT,
+                        code TEXT UNIQUE NOT NULL,
+                        percent INT,
+                        amount BIGINT DEFAULT 0);"""
+            cursor.execute(create)
+            self.connection.commit()
 
-        # with self.connection.cursor() as cursor:
-        #     create =""" CREATE TABLE IF NOT EXISTS clients
-        #             (id INT PRIMARY KEY AUTO_INCREMENT,
-        #             user_id INT,
-        #             api_id INT,
-        #             api_hash TEXT,
-        #             phone TEXT NOT NULL,
-        #             ai_settings TEXT,
-        #             mailing_text TEXT,
-        #             answers BIGINT DEFAULT 0,
-        #             gs TEXT UNIQUE ,
-        #             is_active BOOL DEFAULT false,
-        #             FOREIGN KEY(user_id) REFERENCES users(id) )"""
-        #     cursor.execute(create)
-        #     self.connection.commit()
+    def add_promo(self, promo: Promo):
+        self.connection.ping()
+        with self.connection.cursor() as cursor:
+            cursor.execute("INSERT IGNORE INTO Promo (code, percent, amount) VALUES (%s, %s,%s) ",
+                           (promo.code, promo.percent, promo.amount))
+            self.connection.commit()
+            self.connection.close()
+
+    def get_promo_by_code(self, code: str):
+        self.connection.ping()
+        with self.connection.cursor() as cursor:
+            cursor.execute("SELECT * FROM Promo WHERE code=%s ", (code))
+            res = cursor.fetchone()
+            if res:
+                return Promo(*res)
+            return None
+
+    def get_all_promo(self):
+        self.connection.ping()
+        with self.connection.cursor() as cursor:
+            cursor.execute("SELECT * FROM Promo ")
+            res = cursor.fetchall()
+
+            return [Promo(*r)for r in res]
 
     def add_user(self, user: User):
         self.connection.ping()
@@ -101,7 +121,7 @@ class Database:
                             food_data.grams,
                             food_data.carbs,
                             food_data.fats,
-                            str(datetime.now().date())))
+                            str(datetime.date.today())))
             self.connection.commit()
             self.connection.close()
 
@@ -122,7 +142,7 @@ class Database:
         self.connection.ping()
         with self.connection.cursor() as cursor:
             cursor.execute(
-                """SELECT * FROM Records WHERE date=%s and telegram_id=%s""", (datetime.now().date(), telegram_id))
+                """SELECT * FROM Records WHERE date=%s and telegram_id=%s""", (datetime.date.today(), telegram_id))
             res = cursor.fetchall()
             result = 0
             for r in res:
@@ -130,6 +150,54 @@ class Database:
                     result += int(r[4])
 
         return result
+
+    @staticmethod
+    def add_one_month(orig_date):
+        # advance year and month by one month
+        new_year = orig_date.year
+        new_month = orig_date.month + 1
+        # note: in datetime.date, months go from 1 to 12
+        if new_month > 12:
+            new_year += 1
+            new_month -= 12
+        new_day = orig_date.day
+        # while day is out of range for month, reduce by one
+        while True:
+            try:
+                new_date = datetime.date(new_year, new_month, new_day)
+            except ValueError as e:
+                new_day -= 1
+            else:
+                break
+        return new_date
+
+    def set_month_subscription(self, telegram_id):
+        self.connection.ping()
+        with self.connection.cursor() as cursor:
+            end_date = self.add_one_month(datetime.date.today())
+            cursor.execute(
+                """UPDATE Users SET subscription = %s WHERE telegram_id=%s""", (end_date, telegram_id))
+            cursor.fetchone()
+            self.connection.commit()
+            self.connection.close()
+
+    def update_user_discount(self, telegram_id, discount):
+        self.connection.ping()
+        with self.connection.cursor() as cursor:
+            cursor.execute(
+                """UPDATE Users SET discount = %s WHERE telegram_id=%s""", (discount, telegram_id))
+            cursor.fetchone()
+            self.connection.commit()
+            self.connection.close()
+
+    def update_free_diary_records(self, telegram_id):
+        self.connection.ping()
+        with self.connection.cursor() as cursor:
+            cursor.execute(
+                """UPDATE Users SET free_diary_records = free_diary_records - 1 WHERE telegram_id=%s""", (telegram_id))
+            cursor.fetchone()
+            self.connection.commit()
+            self.connection.close()
 
     def update_daily_calory(self, telegram_id, calory):
         self.connection.ping()

@@ -1,12 +1,13 @@
 from dataclasses import dataclass
+import datetime
 
 
 @dataclass
 class User:
     id: int
     user_id: int
-    username: str
     full_name: str
+    username: str
     has_access: bool
     role: str
     weight: int
@@ -16,6 +17,9 @@ class User:
     activity: str
     goal: str
     daily_calory: str
+    discount: int
+    subscription: datetime.date
+    free_diary_records: int
 
     def __repr__(self) -> str:
         return f"""<b>Рост</b>:{self.height}
@@ -54,3 +58,14 @@ class FoodData:
     def __repr__(self):
         return f"Блюдо:{self.dish}\nБелки:{self.protein}\nКаллории:{self.calories}\n" \
                f"Граммы:{self.grams}\nУглеводы:{self.carbs}\nЖиры:{self.fats}"
+
+
+@dataclass
+class Promo:
+    id: int = None
+    code: str = None
+    percent: int = None
+    amount: int = 0
+
+    def __repr__(self):
+        return f"ПРОМОКОД:{self.code}\nПРОЦЕНТЫ: {self.percent}%\nИСПОЛЬЗОВАНО: {self.amount}"

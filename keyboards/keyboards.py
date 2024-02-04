@@ -13,18 +13,40 @@ class Keyboards:
         self.mailing_cd = CallbackData("admin", "command")
         self.add_calory_diary_cd = CallbackData("calory", "amount")
         self.add_dish_to_error_list_cd = CallbackData("dish", "amount")
+        self.confirm_promo_cd = CallbackData("promo", "code", "percent")
+        self.confirm_bill_cb = CallbackData(
+            "confirm_bill", "user_id", "command")
         self.back_cd = CallbackData("back", "role")
 
     async def start_kb(self):
 
         kb = ReplyKeyboardMarkup(resize_keyboard=True, row_width=2)
-       #  res = []
+
         kb.add(KeyboardButton(text="Подсчет каллорий"),
                KeyboardButton(text="Дневник"))
+
         kb.add(KeyboardButton(text="Настройки"),
                KeyboardButton(text="Подписка"))
 
-       #  kb.row(*res)
+        return kb
+
+    async def subscription_kb(self):
+        kb = InlineKeyboardMarkup()
+        kb.add(InlineKeyboardButton("Промокод", callback_data="set_wait_promo_code"),
+               InlineKeyboardButton("Отправить чек об оплате",
+                                    callback_data="set_send_bill"),
+               )
+        return kb
+
+    async def confirm_bill_kb(self, user_id):
+        kb = InlineKeyboardMarkup()
+        kb.add(InlineKeyboardButton("Подтвердить оплату", callback_data=self.confirm_bill_cb.new(user_id=user_id, command="confirm")),
+               InlineKeyboardButton("Отклонить оплату",
+                                    callback_data=self.confirm_bill_cb.new(user_id=user_id, command="decline")),
+               InlineKeyboardButton("Данные пользователя",
+                                    callback_data=self.confirm_bill_cb.new(user_id=user_id, command="user_info")),
+
+               )
         return kb
 
     async def add_diary_record_kb(self, calory_amount):
@@ -77,8 +99,6 @@ class Keyboards:
         kb = InlineKeyboardMarkup()
         kb.add(InlineKeyboardButton(text="Данные верны",
                callback_data="Низкая"))
-        kb.add(InlineKeyboardButton(text="Средняя",
-               callback_data="Средняя"))
         kb.add(InlineKeyboardButton(text="Назад",
                callback_data=self.back_cd.new(role='user')))
         return kb
@@ -92,6 +112,20 @@ class Keyboards:
                callback_data=self.admin_cd.new(command="statistic")))
         kb.add(InlineKeyboardButton(text="Изменить промт",
                callback_data=self.admin_cd.new(command="edit promt")))
+        kb.add(InlineKeyboardButton(text="Создать промокод",
+               callback_data=self.admin_cd.new(command="promo")))
+        kb.add(InlineKeyboardButton(text="Статистика промокодов",
+               callback_data=self.admin_cd.new(command="promo_stats")))
+        kb.add(InlineKeyboardButton(text="Назад",
+               callback_data=self.back_cd.new(role='user')))
+
+        return kb
+
+    async def confirm_promo_kb(self, promo_code: str, percent: int):
+        kb = InlineKeyboardMarkup()
+        kb.add(InlineKeyboardButton(text="Добавить промокод",
+                                    callback_data=self.confirm_promo_cd.new(code=promo_code,
+                                                                            percent=percent)))
         kb.add(InlineKeyboardButton(text="Назад",
                callback_data=self.back_cd.new(role='user')))
 

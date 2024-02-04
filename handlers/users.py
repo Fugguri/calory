@@ -23,7 +23,8 @@ async def start(message: types.Message, state: FSMContext):
         db.add_user(message.from_user)
 
     markup = await kb.start_kb()
-    await message.answer(cfg.misc.messages.start, reply_markup=markup)
+    video = open("docs/IMG_0951.MOV", 'rb')
+    await message.answer_video(video, caption=cfg.misc.messages.start, reply_markup=markup)
     await state.finish()
     try:
         pass
@@ -35,6 +36,8 @@ async def calculate_calory(message: types.Message, state: FSMContext):
     cfg: Config = ctx_data.get()['config']
     kb: Keyboards = ctx_data.get()['keyboards']
     db: Database = ctx_data.get()['db']
+
+    user = db.get_user(message.from_user.id)
     await message.answer("Отправьте фотографию для подсчета каллорий.")
     await state.set_state("wait photo")
 
@@ -45,7 +48,6 @@ async def wait_photo(message: types.Message, state: FSMContext):
     result: str = await calculator.send_photo(path.name, message.caption)
     food_data = extract_food_data(result)
     markup = await kb.back_kb("user")
-    print(food_data.calories)
     if food_data.calories != "Неизвестно":
         markup = await kb.add_diary_record_kb(food_data.calories)
     await message.answer(result, reply_markup=markup)
@@ -60,7 +62,8 @@ async def add_record_to_diary(callback: types.CallbackQuery, state: FSMContext, 
     db.add_diary_record(callback.from_user.id, food_data)
     amount_daily_calory = db.get_amount_daily_records(callback.from_user.id)
     user: User = db.get_user(callback.from_user.id)
-
+    if not user.subscription:
+        db.update_free_diary_records(callback.from_user.id)
     await callback.message.answer("Добавлено в дневник")
     if amount_daily_calory > user.daily_calory:
         await callback.message.answer(f"Внимание!!!\nКалорий на сегодня уже достаточно.\n{amount_daily_calory}/{user.daily_calory}")
@@ -186,7 +189,89 @@ async def payment(message: types.Message, state: FSMContext):
     cfg: Config = ctx_data.get()['config']
     kb: Keyboards = ctx_data.get()['keyboards']
     db: Database = ctx_data.get()['db']
-    await message.answer("Тут будет оплата.")
+
+    user = db.get_user(message.from_user.id)
+    multiplier = 1 - user.discount/100
+    summ = int(399 * multiplier)
+    markup = await kb.subscription_kb()
+    await message.answer(f'Чтобы оплатить подписку отправьте <b><i>{summ} рублей</i></b> на счет 5536913844250627 Тинькоф\
+\n\n<b>Если у вас есть промокод</b> - нажмите на кнопку <i>"Промокод"</i>.\
+\n\n<b>Если вы оплатили подписку</b> - нажмите на кнопку <i>"Отправить чек об оплате"</i>', reply_markup=markup)
+
+
+async def set_wait_bill(callback: types.CallbackQuery, state: FSMContext):
+    cfg: Config = ctx_data.get()['config']
+    kb: Keyboards = ctx_data.get()['keyboards']
+    db: Database = ctx_data.get()['db']
+
+    await state.set_state("wait_bill")
+    await callback.message.answer("Отправьте скриншот с чеком об оплате для подтверждения.\
+\nЧеки обрабатываются вручную, это может занять некоторое время.")
+
+
+async def wait_bill(message: types.Message, state: FSMContext):
+    cfg: Config = ctx_data.get()['config']
+    kb: Keyboards = ctx_data.get()['keyboards']
+    db: Database = ctx_data.get()['db']
+    markup = await kb.confirm_bill_kb(message.from_user.id)
+    if message.text is not None:
+        await message.bot.send_message(-1002146651809, message.text, reply_markup=markup)
+    elif message.photo is not None:
+        await message.bot.send_photo(chat_id=-1002146651809, photo=message.photo[-1].file_id,
+                                     caption=message.caption, reply_markup=markup)
+    elif message.document is not None:
+        await message.bot.send_document(chat_id=-1002146651809, document=message.document.file_id,
+                                        caption=message.caption, reply_markup=markup)
+    markup = await kb.start_kb()
+    await state.finish()
+    await message.answer("Ваша заявка об оплате отправлена на рассмотрение", reply_markup=markup)
+
+
+async def confirm_bill(callback: types.CallbackQuery, state: FSMContext, callback_data: dict):
+    cfg: Config = ctx_data.get()['config']
+    kb: Keyboards = ctx_data.get()['keyboards']
+    db: Database = ctx_data.get()['db']
+
+    user_id = callback_data.get("user_id")
+
+    match callback_data.get("command"):
+        case "confirm":
+            db.set_month_subscription(user_id)
+            await callback.message.answer("Уведомление отпрвлено")
+            await callback.bot.send_message(user_id, "Подписка подтверждена.")
+        case "decline":
+            await callback.bot.send_message(user_id, "Подписка отклонена, для уточнения причин свяжитесь с @son2421")
+            await callback.message.answer("Уведомление об отказе отправлено пользователю, он должен самостоятельно связаться.")
+        case "user_info":
+            user = db.get_user(user_id)
+            await callback.message.answer(f"ID telegram {str(user.user_id)} username: @{user.username}")
+
+
+async def set_wait_promo_code(callback: types.CallbackQuery, state: FSMContext):
+    cfg: Config = ctx_data.get()['config']
+    kb: Keyboards = ctx_data.get()['keyboards']
+    db: Database = ctx_data.get()['db']
+
+    markup = await kb.back_kb("user")
+    await state.set_state("wait_promo_code")
+    await callback.message.answer("Отправьте промокод", reply_markup=markup)
+
+
+async def wait_promo_code(message: types.Message, state: FSMContext):
+    cfg: Config = ctx_data.get()['config']
+    kb: Keyboards = ctx_data.get()['keyboards']
+    db: Database = ctx_data.get()['db']
+
+    promo = db.get_promo_by_code(message.text)
+    if not promo:
+        markup = await kb.back_kb("user")
+        await message.answer("Такого промокода не существует.\nПопробуйте заново!", reply_markup=markup)
+        return
+    markup = await kb.subscription_kb()
+    db.update_user_discount(message.from_user.id, promo.percent)
+    await state.finish()
+
+    await message.answer(f"Промокод успешно применен, за вами закреплена скидка <b>{promo.percent}%</b>.")
 
 
 async def wait_text(message: types.Message, state: FSMContext):
@@ -213,9 +298,23 @@ async def back(callback: types.CallbackQuery, state: FSMContext):
 def register_user_handlers(dp: Dispatcher, kb: Keyboards):
     dp.register_message_handler(start, commands=["start"], state="*")
     dp.register_message_handler(diary, regexp="Дневник", state="*")
-    dp.register_message_handler(payment, regexp="Оплата", state="*")
     dp.register_message_handler(
         calculate_calory, regexp="Подсчет каллорий", state="*")
+
+    dp.register_message_handler(payment, regexp="Подписка", state="*")
+    dp.register_callback_query_handler(
+        set_wait_promo_code, lambda x: x.data == "set_wait_promo_code", state="*")
+    dp.register_message_handler(
+        wait_promo_code, state="wait_promo_code")
+    dp.register_callback_query_handler(
+        set_wait_bill, lambda x: x.data == "set_send_bill", state="*")
+    dp.register_message_handler(wait_bill,
+                                content_types=[types.ContentType.PHOTO,
+                                               types.ContentTypes.PHOTO,
+                                               ], state="wait_bill")
+    dp.register_callback_query_handler(
+        confirm_bill, kb.confirm_bill_cb.filter(), state="*")
+
     dp.register_message_handler(settings, regexp="Настройки", state="*")
     dp.register_message_handler(wait_height, state="wait height")
     dp.register_message_handler(wait_weight, state="wait weight")
