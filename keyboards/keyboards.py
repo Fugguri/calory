@@ -25,7 +25,7 @@ class Keyboards:
         kb.add(KeyboardButton(text="Подсчет каллорий"),
                KeyboardButton(text="Дневник"))
 
-        kb.add(KeyboardButton(text="Настройки"),
+        kb.add(KeyboardButton(text=""),
                KeyboardButton(text="Подписка"))
 
         return kb
