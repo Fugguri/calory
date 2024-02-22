@@ -44,13 +44,27 @@ async def calculate_calory(message: types.Message, state: FSMContext):
 
 async def wait_photo(message: types.Message, state: FSMContext):
     kb: Keyboards = ctx_data.get()['keyboards']
-    path = await message.photo[0].download()
-    result: str = await calculator.send_photo(path.name, message.caption)
+    # path = await message.photo[0].download()
+    await state.set_state("wait_photo_description")
+    await state.update_data(photo=message.photo[0])
+    await message.answer("Отправиьте название блюда или описание, для компонентов")
+
+
+async def wait_photo_description(message: types.Message, state: FSMContext):
+    cfg: Config = ctx_data.get()['config']
+    kb: Keyboards = ctx_data.get()['keyboards']
+    db: Database = ctx_data.get()['db']
+    photo = await state.get_data("photo")
+    path = await photo["photo"].download()
+    mes = await message.answer("Веду подсчет...")
+    result: str = await calculator.send_photo(path.name, message.text)
     food_data = extract_food_data(result)
     markup = await kb.back_kb("user")
     if food_data.calories != "Неизвестно":
         markup = await kb.add_diary_record_kb(food_data)
+    await mes.delete()
     await message.answer(result, reply_markup=markup)
+    await state.finish()
 
 
 async def add_record_to_diary(callback: types.CallbackQuery, state: FSMContext, callback_data: dict):
@@ -371,6 +385,9 @@ def register_user_handlers(dp: Dispatcher, kb: Keyboards):
                                 content_types=[types.ContentType.PHOTO,
                                                types.ContentTypes.PHOTO,
                                                ], state="wait photo")
+    dp.register_message_handler(
+        wait_photo_description, state="wait_photo_description")
+
     # dp.register_message_handler(wait_text,
     #                             content_types=[types.ContentType.TEXT,
     #                                            types.ContentTypes.TEXT,
