@@ -11,7 +11,8 @@ class Keyboards:
         self.start_cd = CallbackData("start", "character_id")
         self.admin_cd = CallbackData("mailing", "command")
         self.mailing_cd = CallbackData("admin", "command")
-        self.add_calory_diary_cd = CallbackData("calory", "amount")
+        self.add_calory_diary_cd = CallbackData(
+            "calory", 'd', "cal", "pr", 'gr', "carbs", 'fats')
         self.add_dish_to_error_list_cd = CallbackData("dish", "amount")
         self.confirm_promo_cd = CallbackData("promo", "code", "percent")
         self.confirm_bill_cb = CallbackData(
@@ -25,7 +26,7 @@ class Keyboards:
         kb.add(KeyboardButton(text="Подсчет каллорий"),
                KeyboardButton(text="Дневник"))
 
-        kb.add(KeyboardButton(text=""),
+        kb.add(KeyboardButton(text="Ввести свои данные"),
                KeyboardButton(text="Подписка"))
 
         return kb
@@ -49,12 +50,18 @@ class Keyboards:
                )
         return kb
 
-    async def add_diary_record_kb(self, calory_amount):
+    async def add_diary_record_kb(self, food_data: FoodData):
         kb = InlineKeyboardMarkup()
         kb.add(InlineKeyboardButton(text="Добавить запись",
-               callback_data=self.add_calory_diary_cd.new(amount=calory_amount)))
+               callback_data=self.add_calory_diary_cd.new(d=food_data.dish,
+                                                          cal=food_data.calories,
+                                                          pr=food_data.protein,
+                                                          gr=food_data.grams,
+                                                          carbs=food_data.carbs,
+                                                          fats=food_data.fats
+                                                          )))
         kb.add(InlineKeyboardButton(text="Неправильный подсчет грам",
-               callback_data=self.add_dish_to_error_list_cd.new(amount=calory_amount)))
+               callback_data=self.add_dish_to_error_list_cd.new(amount=food_data.dish)))
         return kb
 
     async def sex_kb(self):

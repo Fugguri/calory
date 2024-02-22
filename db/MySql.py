@@ -121,7 +121,7 @@ class Database:
                             food_data.grams,
                             food_data.carbs,
                             food_data.fats,
-                            str(datetime.date.today())))
+                            str(datetime.datetime.now())))
             self.connection.commit()
             self.connection.close()
 

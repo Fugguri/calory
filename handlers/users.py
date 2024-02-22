@@ -23,8 +23,8 @@ async def start(message: types.Message, state: FSMContext):
         db.add_user(message.from_user)
 
     markup = await kb.start_kb()
-    video = open("docs/IMG_0951.MOV", 'rb')
-    await message.answer_video(video, caption=cfg.misc.messages.start, reply_markup=markup)
+    # video = open("docs/IMG_0951.MOV", 'rb')
+    await message.answer(text=cfg.misc.messages.start, reply_markup=markup)
     await state.finish()
     try:
         pass
@@ -49,7 +49,7 @@ async def wait_photo(message: types.Message, state: FSMContext):
     food_data = extract_food_data(result)
     markup = await kb.back_kb("user")
     if food_data.calories != "Неизвестно":
-        markup = await kb.add_diary_record_kb(food_data.calories)
+        markup = await kb.add_diary_record_kb(food_data)
     await message.answer(result, reply_markup=markup)
 
 
@@ -73,8 +73,22 @@ async def add_record_to_errors(callback: types.CallbackQuery, state: FSMContext,
     cfg: Config = ctx_data.get()['config']
     kb: Keyboards = ctx_data.get()['keyboards']
     db: Database = ctx_data.get()['db']
-    callory = callback_data.get("amount")
-    food_data = FoodData(calories=callory)
+    # callory = callback_data.get("amount")
+    dish = callback_data.get("d")
+    protein = callback_data.get("cal")
+    calories = callback_data.get("pr")
+    grams = callback_data.get("gr")
+    carbs = callback_data.get("carbs")
+    fats = callback_data.get("fats")
+    food_data = FoodData(
+        dish=dish,
+        protein=protein,
+        calories=calories,
+        grams=grams,
+        carbs=carbs,
+        fats=fats,
+
+    )
     db.add_diary_record(callback.from_user.id, food_data)
     amount_daily_calory = db.get_amount_daily_records(callback.from_user.id)
     user: User = db.get_user(callback.from_user.id)
