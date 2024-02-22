@@ -57,8 +57,24 @@ async def add_record_to_diary(callback: types.CallbackQuery, state: FSMContext, 
     cfg: Config = ctx_data.get()['config']
     kb: Keyboards = ctx_data.get()['keyboards']
     db: Database = ctx_data.get()['db']
-    callory = callback_data.get("amount")
-    food_data = FoodData(calories=callory)
+    # callory = callback_data.get("amount")
+    # food_data = FoodData(calories=callory)
+    dish = callback_data.get("d")
+    protein = callback_data.get("pr")
+    calories = callback_data.get("cal")
+    grams = callback_data.get("gr")
+    carbs = callback_data.get("carbs")
+    fats = callback_data.get("fats")
+    food_data = FoodData(
+        dish=dish,
+        protein=protein,
+        calories=calories,
+        grams=grams,
+        carbs=carbs,
+        fats=fats,
+
+    )
+
     db.add_diary_record(callback.from_user.id, food_data)
     amount_daily_calory = db.get_amount_daily_records(callback.from_user.id)
     user: User = db.get_user(callback.from_user.id)

@@ -142,7 +142,11 @@ class Database:
         self.connection.ping()
         with self.connection.cursor() as cursor:
             cursor.execute(
-                """SELECT * FROM Records WHERE date=%s and telegram_id=%s""", (datetime.date.today(), telegram_id))
+                """SELECT * FROM Records 
+                WHERE Month(date) = Month(DATE(NOW()))
+                AND Year(date) = Year(DATE(NOW()))
+                AND Date(date)= Date(DATE(NOW()))
+                and telegram_id=%s ORDER BY date""", (telegram_id))
             res = cursor.fetchall()
             result = 0
             for r in res:
