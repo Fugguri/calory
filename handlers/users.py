@@ -367,7 +367,8 @@ def register_user_handlers(dp: Dispatcher, kb: Keyboards):
     dp.register_callback_query_handler(
         confirm_bill, kb.confirm_bill_cb.filter(), state="*")
 
-    dp.register_message_handler(settings, regexp="Настройки", state="*")
+    dp.register_message_handler(
+        settings, regexp="Ввести свои данные", state="*")
     dp.register_message_handler(wait_height, state="wait height")
     dp.register_message_handler(wait_weight, state="wait weight")
     dp.register_message_handler(wait_age, state="wait age")
