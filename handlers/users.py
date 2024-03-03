@@ -20,16 +20,14 @@ async def start(message: types.Message, state: FSMContext):
     try:
         db.get_user(message.from_user.id)
     except:
-        db.add_user(message.from_user)
+        ...
 
     markup = await kb.start_kb()
-    # video = open("docs/IMG_0951.MOV", 'rb')
     await message.answer(text=cfg.misc.messages.start, reply_markup=markup)
+    markup = await kb.education_kb()
+
+    await message.answer(text="Хотите пройдит обчучение, как пользоваться ботом?", reply_markup=markup)
     await state.finish()
-    try:
-        pass
-    except:
-        await message.message.answer(cfg.misc.messages.start, reply_markup=markup)
 
 
 async def calculate_calory(message: types.Message, state: FSMContext):
@@ -86,7 +84,6 @@ async def add_record_to_diary(callback: types.CallbackQuery, state: FSMContext, 
         grams=grams,
         carbs=carbs,
         fats=fats,
-
     )
 
     db.add_diary_record(callback.from_user.id, food_data)

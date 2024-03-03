@@ -8,6 +8,7 @@ from config.config import load_config
 from keyboards.keyboards import Keyboards
 from handlers.users import register_user_handlers
 from handlers.admin import register_admin_handlers
+from handlers.education import register_education_handlers
 
 from middlewares.environment import EnvironmentMiddleware
 from middlewares import SubscriptionMiddleware
@@ -27,6 +28,7 @@ async def register_all_middlewares(dp, config, keyboards, db, openai, bot, ):
 def register_all_handlers(dp, keyboards):
     register_admin_handlers(dp, keyboards)
     register_user_handlers(dp, keyboards)
+    register_education_handlers(dp, keyboards)
 
 
 async def main():
