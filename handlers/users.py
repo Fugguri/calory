@@ -287,8 +287,7 @@ async def process_successful_payment(message: types.Message):
     bot: Keyboards = ctx_data.get()['bot']
     db: Database = ctx_data.get()['db']
 
-    db.update_user(message.from_user.id,
-                   subscription_end=add_one_month(datetime.datetime.now()))
+    db.set_month_subscription(message.from_user.id)
     await bot.send_message(
         message.chat.id,
         "Вы успешно оплатили подписку, общайтесь без ограничений."
