@@ -232,20 +232,67 @@ async def payment(message: types.Message, state: FSMContext):
     db: Database = ctx_data.get()['db']
 
     user = db.get_user(message.from_user.id)
-    multiplier = 1 - user.discount/100
-    summ = int(399 * multiplier)
+    summ = int(39900)
+    PRICE = types.LabeledPrice(label='Подписка на месяц SlimFoto', amount=summ)
+    await message.bot.send_invoice(
+        message.chat.id,
+        title="Подписка на SlimFoto",
+        description="Подписка на 1 месяц",
+        provider_token="390540012:LIVE:47486",
+        currency='rub',
+        prices=[PRICE],
+        start_parameter='subscription',
+        payload='some-invoice-payload',
+    )
     markup = await kb.subscription_kb()
-    await message.answer(f"""Премиум Подписка 🌟
-Что вы получите: 
-1. Доступ к сервису на 1 месяц
-2. Возможность по фото определять калорийность блюда 
-3. Личный дневник в котором вы будете контролировать ежедневное потребление  калорий
+#     await message.answer(f"""Премиум Подписка 🌟
+# Что вы получите:
+# 1. Доступ к сервису на 1 месяц
+# 2. Возможность по фото определять калорийность блюда
+# 3. Личный дневник в котором вы будете контролировать ежедневное потребление  калорий
 
-Стоимость месячной подписки: 390 рублей 
+# Стоимость месячной подписки: 390 рублей
 
-В ближайших обновлениях вы также получите:
-- Фитнес тренер под рукой. Ответит на все ваши вопросы, составит план тренировок по запросу. 
-- Ежедневный мотиватор, будет напоминать о плановых тренировках и давать рекомендации по питанию.""", reply_markup=markup)
+# В ближайших обновлениях вы также получите:
+# - Фитнес тренер под рукой. Ответит на все ваши вопросы, составит план тренировок по запросу.
+# - Ежедневный мотиватор, будет напоминать о плановых тренировках и давать рекомендации по питанию.""", reply_markup=markup)
+
+
+async def process_pre_checkout_query(pre_checkout_query: types.PreCheckoutQuery):
+    bot: Keyboards = ctx_data.get()['bot']
+    await bot.answer_pre_checkout_query(pre_checkout_query.id, ok=True)
+
+
+def add_one_month(orig_date):
+    # advance year and month by one month
+    new_year = orig_date.year
+    new_month = orig_date.month + 1
+    # note: in datetime.date, months go from 1 to 12
+    if new_month > 12:
+        new_year += 1
+        new_month -= 12
+    new_day = orig_date.day
+    # while day is out of range for month, reduce by one
+    while True:
+        try:
+            new_date = datetime.date(new_year, new_month, new_day)
+        except ValueError as e:
+            new_day -= 1
+        else:
+            break
+    return new_date
+
+
+async def process_successful_payment(message: types.Message):
+    bot: Keyboards = ctx_data.get()['bot']
+    db: Database = ctx_data.get()['db']
+
+    db.update_user(message.from_user.id,
+                   subscription_end=add_one_month(datetime.datetime.now()))
+    await bot.send_message(
+        message.chat.id,
+        "Вы успешно оплатили подписку, общайтесь без ограничений."
+    )
 
 
 async def set_wait_bill(callback: types.CallbackQuery, state: FSMContext):
@@ -384,9 +431,9 @@ def register_user_handlers(dp: Dispatcher, kb: Keyboards):
                                                types.ContentTypes.PHOTO,
                                                ], state="wait photo")
     dp.register_message_handler(
-        wait_photo_description, state="wait_photo_description")
-
-    # dp.register_message_handler(wait_text,
-    #                             content_types=[types.ContentType.TEXT,
-    #                                            types.ContentTypes.TEXT,
-    #                                            ], )
+        process_successful_payment,
+        content_types=types.ContentType.SUCCESSFUL_PAYMENT, state="*")
+    dp.register_pre_checkout_query_handler(
+        process_pre_checkout_query, state="*")
+    dp.message_handler(process_successful_payment,
+                       content_types=types.ContentType.SUCCESSFUL_PAYMENT)
