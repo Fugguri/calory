@@ -241,8 +241,10 @@ async def payment(message: types.Message, state: FSMContext):
         provider_token="390540012:LIVE:47486",
         currency='rub',
         prices=[PRICE],
+        need_email=True,
+        send_email_to_provider=True,
         start_parameter='subscription',
-        payload='some-invoice-payload',
+        payload='Payload1',
     )
     markup = await kb.subscription_kb()
 #     await message.answer(f"""Премиум Подписка 🌟
