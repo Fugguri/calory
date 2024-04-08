@@ -18,7 +18,27 @@ async def go_educate(callback: types.CallbackQuery, state: FSMContext):
     kb: Keyboards = ctx_data.get()['keyboards']
     db: Database = ctx_data.get()['db']
     markup = await kb.back_kb("user")
-    await callback.message.answer("Хорошо, давайте заполним информацию о вас.\nВведите свой рост.", reply_markup=markup)
+    await callback.message.answer("Как мне к тебе обращаться?", reply_markup=markup)
+    await state.set_state('educate wait name')
+
+
+async def educate_wait_name(message: types.Message, state: FSMContext):
+    cfg: Config = ctx_data.get()['config']
+    kb: Keyboards = ctx_data.get()['keyboards']
+    db: Database = ctx_data.get()['db']
+    markup = await kb.back_kb("user")
+    await state.update_data(name=message.text)
+    await message.answer("Сколько тебе полных лет?", reply_markup=markup)
+    await state.set_state('educate wait age')
+
+
+async def educate_wait_age(message: types.Message, state: FSMContext):
+    cfg: Config = ctx_data.get()['config']
+    kb: Keyboards = ctx_data.get()['keyboards']
+    db: Database = ctx_data.get()['db']
+    markup = await kb.back_kb("user")
+    await state.update_data(age=message.text)
+    await message.answer("Какой у тебя рост в сантиметрах?", reply_markup=markup)
     await state.set_state('educate wait height')
 
 
@@ -28,7 +48,7 @@ async def educate_wait_height(message: types.Message, state: FSMContext):
     db: Database = ctx_data.get()['db']
     markup = await kb.back_kb("user")
     await state.update_data(height=message.text)
-    await message.answer("Введите свой вес", reply_markup=markup)
+    await message.answer("Какой у тебя весь в кг?", reply_markup=markup)
     await state.set_state('educate wait weight')
 
 
@@ -36,19 +56,9 @@ async def educate_wait_weight(message: types.Message, state: FSMContext):
     cfg: Config = ctx_data.get()['config']
     kb: Keyboards = ctx_data.get()['keyboards']
     db: Database = ctx_data.get()['db']
-    markup = await kb.back_kb("user")
     await state.update_data(weight=message.text)
-    await message.answer("Введите свой возраст", reply_markup=markup)
-    await state.set_state('educate wait age')
-
-
-async def educate_wait_age(message: types.Message, state: FSMContext):
-    cfg: Config = ctx_data.get()['config']
-    kb: Keyboards = ctx_data.get()['keyboards']
-    db: Database = ctx_data.get()['db']
-    await state.update_data(age=message.text)
     markup = await kb.sex_kb()
-    await message.answer("Выберите свой пол", reply_markup=markup)
+    await message.answer("Выбери свой пол", reply_markup=markup)
     await state.set_state('educate wait sex')
 
 
@@ -58,7 +68,7 @@ async def educate_wait_sex(callback: types.CallbackQuery, state: FSMContext):
     db: Database = ctx_data.get()['db']
     markup = await kb.activity_kb()
     await state.update_data(sex=callback.data)
-    await callback.message.answer("Выберите вашу активность", reply_markup=markup)
+    await callback.message.answer("Выбери уровень своей активности", reply_markup=markup)
     await state.set_state('educate wait activity')
 
 
@@ -68,7 +78,7 @@ async def educate_wait_activity(callback: types.CallbackQuery, state: FSMContext
     db: Database = ctx_data.get()['db']
     markup = await kb.goal_kb()
     await state.update_data(activity=callback.data)
-    await callback.message.answer("Выберите цель", reply_markup=markup)
+    await callback.message.answer("Какая у тебя цель?", reply_markup=markup)
     await state.set_state('educate wait goal')
 
 
@@ -93,10 +103,21 @@ async def educate_confirm_settings(callback: types.CallbackQuery, state: FSMCont
     calory = calculate_calories(settings)
     db.update_user_data(callback.from_user.id, settings)
     db.update_daily_calory(callback.from_user.id, calory)
+    markup = await kb.education_count_callory_kb()
+    await callback.message.answer(
+        ('Замечательно, теперь я знаю о тебе всё необходимое, чтобы помочь тебе на пути к здоровому образу жизни и красивой фигуре!\n\n🌷 Ты сделала важный шаг, и я горжусь тобой!'
+         '\nДавай попробуем что-то весёлое и полезное? Сфотографируй своё следующее блюдо и отправь мне фото. Нажми кнопку "Подсчёт калорий", и я расскажу тебе всё о пище, которую ты собираешься съесть. Это поможет тебе осознанно подходить к выбору продуктов и контролировать своё питание.'
+         '\nНе волнуйся, я здесь, чтобы взять на себя все сложности! Тебе всего лишь нужно делать фото еды при каждом приёме пищи, а о всём остальном позаботится твоя новая бот-подружка! 📸🥗'
+         '\n\nДавай начнём! Нажми на кнопку "Подсчёт калорий" и присылай своё первое фото. Вместе мы сделаем твою мечту реальностью!'),
+        reply_markup=markup
+    )
+    await state.finish()
 
-    await callback.message.answer(f'Ваша дневная норма - {calory}ккал.\nДля получения подсчета каллорий отправьте фото блюда.\nВы всегда сможете подсчитать каллории, по кнопке "Подсчет каллорий"')
 
+async def educate_cout_callory_photo(callback: types.CallbackQuery, state: FSMContext):
+    kb: Keyboards = ctx_data.get()['keyboards']
     await state.set_state('educate wait photo')
+    await callback.message.answer("Отправь фото для анализа БЖУ.")
 
 
 async def educate_wait_photo(message: types.Message, state: FSMContext):
@@ -106,7 +127,7 @@ async def educate_wait_photo(message: types.Message, state: FSMContext):
 
     await state.update_data(photo=message.photo[0])
 
-    await message.answer("Отправиьте название блюда или описание, для компонентов")
+    await message.answer('Отлично! Спасибо за фото! 📸 Чтобы повысить точность анализа, пришли, пожалуйста, несколько слов с описанием блюда. Например, если это "овощной салат" или "куриный суп", просто укажи это. Это поможет мне сделать анализ калорийности и питательной ценности ещё более точным. Жду твоего описания! 🥗🍲')
 
     await state.set_state("educate wait_photo_description")
 
@@ -120,13 +141,16 @@ async def educate_wait_photo_description(message: types.Message, state: FSMConte
     mes = await message.answer("Веду подсчет...")
     user = db.get_user(message.from_user.id)
     result: str = await calculator.send_photo(path.name, message.text)
+    print(result)
     food_data = extract_food_data(result)
     markup = await kb.back_kb("user")
     if food_data.calories != "Неизвестно":
         markup = await kb.add_diary_record_kb(food_data)
+    text = await calculator.create_educate_answer(food_data=food_data, user=user)
+    await message.answer(text, reply_markup=markup)
     await mes.delete()
-    await message.answer(result+'\nВы получили БЖУ. Чтобы дабавить данные в дневник питания - нажмите кнопку "Добавить запись ', reply_markup=markup)
-    markup = await kb.start_kb(food_data)
+    # await message.answer(result+'\nВы получили БЖУ. Чтобы дабавить данные в дневник питания - нажмите кнопку "Добавить запись ', reply_markup=markup)
+    markup = await kb.start_kb()
 
     await message.answer(f'У вас осталось {user.free_diary_records} бесплатных попыток.\n Вы успешно прошли инструкцию как пользоваться ботом SlimFoto.\n\nЧтобы приобрести подписку нажмите на кнопку "Подписка"', reply_markup=markup)
 
@@ -134,13 +158,14 @@ async def educate_wait_photo_description(message: types.Message, state: FSMConte
 def register_education_handlers(dp: Dispatcher, kb: Keyboards):
 
     dp.register_callback_query_handler(
-        go_educate, lambda x: x.data == "educate", state="*")
-
+        go_educate, lambda x: x.data == "wait_user_data", state="*")
+    dp.register_message_handler(
+        educate_wait_name, state="educate wait name")
+    dp.register_message_handler(educate_wait_age, state="educate wait age")
     dp.register_message_handler(
         educate_wait_height, state="educate wait height")
     dp.register_message_handler(
         educate_wait_weight, state="educate wait weight")
-    dp.register_message_handler(educate_wait_age, state="educate wait age")
     dp.register_callback_query_handler(
         educate_wait_sex, state="educate wait sex")
     dp.register_callback_query_handler(
@@ -153,6 +178,9 @@ def register_education_handlers(dp: Dispatcher, kb: Keyboards):
     #     educate_add_record_to_diary, kb.add_calory_diary_cd.filter(), state="*")
     # dp.register_callback_query_handler(
     #     add_record_to_errors, kb.add_dish_to_error_list_cd.filter(), state="*")
+    dp.register_callback_query_handler(
+        educate_cout_callory_photo, lambda x: x.data == "education_count_callory", state="*")
+
     dp.register_message_handler(educate_wait_photo,
                                 content_types=[types.ContentType.PHOTO,
                                                types.ContentTypes.PHOTO,

@@ -20,9 +20,11 @@ class User:
     discount: int
     subscription: datetime.date
     free_diary_records: int
+    name: str
 
     def __repr__(self) -> str:
-        return f"""<b>Рост</b>:{self.height}
+        return f"""<b>Имя</b>:{self.name}
+<b>Рост</b>:{self.height}
 <b>Вес</b>:{self.weight}
 <b>Возраст</b>:{self.age}
 <b>Пол</b>:{self.sex}
@@ -34,6 +36,7 @@ class User:
 
 @dataclass
 class Settings:
+    name: str
     height: int
     weight: int
     age: int
@@ -42,7 +45,7 @@ class Settings:
     goal: str
 
     def __repr__(self) -> str:
-        return f"Рост:{self.height}\nВес:{self.weight}\nВозраст:{self.age}\nПол:{self.sex}\nАктивность:{self.activity}\nЦель:{self.goal} "
+        return f"Имя:{self.name}\nРост:{self.height}\nВес:{self.weight}\nВозраст:{self.age}\nПол:{self.sex}\nАктивность:{self.activity}\nЦель:{self.goal} "
 
 
 @dataclass

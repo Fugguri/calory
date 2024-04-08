@@ -34,7 +34,8 @@ class Database:
                         goal TEXT,
                         daily_calory INT,
                         discount INT DEFAULT 0,
-                        subscription DATE
+                        subscription DATE,
+                        name TEXT
                         );"""
             cursor.execute(create)
             self.connection.commit()
@@ -226,19 +227,22 @@ class Database:
         with self.connection.cursor() as cursor:
             cursor.execute(
                 """UPDATE Users SET
+                name = %s,
                 weight = %s,
                 height = %s,
                 age = %s,
                 activity= %s, 
                 sex= %s, 
                 goal= %s
-                WHERE telegram_id=%s""", (settings.weight,
-                                          settings.height,
-                                          settings.age,
-                                          settings.activity,
-                                          settings.sex,
-                                          settings.goal,
-                                          telegram_id))
+                WHERE telegram_id=%s""", (
+                    settings.name,
+                    settings.weight,
+                    settings.height,
+                    settings.age,
+                    settings.activity,
+                    settings.sex,
+                    settings.goal,
+                    telegram_id))
             cursor.fetchone()
             self.connection.commit()
             self.connection.close()

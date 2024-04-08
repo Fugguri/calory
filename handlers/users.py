@@ -22,11 +22,11 @@ async def start(message: types.Message, state: FSMContext):
     except:
         ...
 
-    markup = await kb.start_kb()
+    markup = await kb.wait_user_data_kb()
     await message.answer(text=cfg.misc.messages.start, reply_markup=markup)
-    markup = await kb.education_kb()
+    # markup = await kb.education_kb()
 
-    await message.answer(text="Хотите пройдит обчучение, как пользоваться ботом?", reply_markup=markup)
+    # await message.answer(text="Хотите пройдит обчучение, как пользоваться ботом?", reply_markup=markup)
     await state.finish()
 
 

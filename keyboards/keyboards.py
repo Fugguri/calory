@@ -45,6 +45,18 @@ class Keyboards:
                )
         return kb
 
+    async def education_count_callory_kb(self):
+        kb = InlineKeyboardMarkup()
+        kb.add(InlineKeyboardButton("Подсчет каллорий", callback_data="education_count_callory")
+               )
+        return kb
+
+    async def wait_user_data_kb(self):
+        kb = InlineKeyboardMarkup()
+        kb.add(InlineKeyboardButton("Ввести свои данные", callback_data="wait_user_data")
+               )
+        return kb
+
     async def confirm_bill_kb(self, user_id):
         kb = InlineKeyboardMarkup()
         kb.add(InlineKeyboardButton("Подтвердить оплату", callback_data=self.confirm_bill_cb.new(user_id=user_id, command="confirm")),
