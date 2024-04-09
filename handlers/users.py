@@ -432,6 +432,9 @@ def register_user_handlers(dp: Dispatcher, kb: Keyboards):
                                                types.ContentTypes.PHOTO,
                                                ], state="wait photo")
     dp.register_message_handler(
+        wait_photo_description, state="wait_photo_description")
+
+    dp.register_message_handler(
         process_successful_payment,
         content_types=types.ContentType.SUCCESSFUL_PAYMENT, state="*")
     dp.register_pre_checkout_query_handler(
