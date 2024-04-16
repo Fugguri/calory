@@ -72,3 +72,18 @@ class Promo:
 
     def __repr__(self):
         return f"ПРОМОКОД:{self.code}\nПРОЦЕНТЫ: {self.percent}%\nИСПОЛЬЗОВАНО: {self.amount}"
+
+
+@dataclass
+class Record:
+    id: str | int = None
+    dish: str = None
+    protein: str = None
+    calories: str = None
+    grams: str = None
+    carbs: str = None
+    fats: str = None
+    date: datetime.datetime | None = None
+
+    def __repr__(self):
+        return f"ПРОМОКОД:{self.code}\nПРОЦЕНТЫ: {self.percent}%\nИСПОЛЬЗОВАНО: {self.amount}"

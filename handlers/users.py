@@ -40,6 +40,34 @@ async def calculate_calory(message: types.Message, state: FSMContext):
     await state.set_state("wait photo")
 
 
+async def remind_daily(message: types.Message, state: FSMContext):
+    cfg: Config = ctx_data.get()['config']
+    kb: Keyboards = ctx_data.get()['keyboards']
+    db: Database = ctx_data.get()['db']
+    # for user in users:
+    #     ...
+    user = db.get_user(message.from_user.id)
+    dishes_list = db.get_amount_yesterday_records(message.from_user.id) or []
+    print(dishes_list)
+    text = await calculator.create_daily_mail_text(user=user, dish_list=dishes_list)
+    await message.answer(text)
+
+
+async def remind_weekly(message: types.Message, state: FSMContext):
+    cfg: Config = ctx_data.get()['config']
+    kb: Keyboards = ctx_data.get()['keyboards']
+    db: Database = ctx_data.get()['db']
+    # users = await Database.get_all_users()
+    # for user in users:
+    #     ...
+
+    user = db.get_user(message.from_user.id)
+
+    dishes_list = db.get_amount_yesterday_records(message.from_user.id) or []
+    text = await calculator.create_daily_mail_text(user=user, dish_list=dishes_list)
+    await message.answer(text)
+
+
 async def wait_photo(message: types.Message, state: FSMContext):
     kb: Keyboards = ctx_data.get()['keyboards']
     # path = await message.photo[0].download()
@@ -411,6 +439,9 @@ def register_user_handlers(dp: Dispatcher, kb: Keyboards):
                                                ], state="wait_bill")
     dp.register_callback_query_handler(
         confirm_bill, kb.confirm_bill_cb.filter(), state="*")
+    dp.register_message_handler(remind_daily, commands=["remain"], state="*")
+    dp.register_message_handler(remind_weekly, commands=[
+                                "remain_w"], state="*")
 
     dp.register_message_handler(
         settings, regexp="Ввести свои данные", state="*")

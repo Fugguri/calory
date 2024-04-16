@@ -1,3 +1,4 @@
+from typing import List
 import openai
 import base64
 import requests
@@ -24,14 +25,14 @@ class Calculator:
             ),
         )
 
-        self.assistant = self.openai.beta.assistants.create(
-            name="Food recognizer",
-            instructions="Ты специалист по питанию, нутрициолог, твоя задача по фото определить состав БЖУ и каллориность пищи. Результат выводи в таблицу. Вес определи приблизительно. Не нужно писать вводную фразу, сразу выдавай таблицу.",
-            # tools=[{"type": "code_interpreter"}],
-            model="gpt-4-1106-preview"
-        )
+        # self.assistant = self.openai.beta.assistants.create(
+        #     name="Food recognizer",
+        #     instructions="Ты специалист по питанию, нутрициолог, твоя задача по фото определить состав БЖУ и каллориность пищи. Результат выводи в таблицу. Вес определи приблизительно. Не нужно писать вводную фразу, сразу выдавай таблицу.",
+        #     # tools=[{"type": "code_interpreter"}],
+        #     model="gpt-4-1106-preview"
+        # )
 
-        self.thread = self.openai.beta.threads.create()
+        # self.thread = self.openai.beta.threads.create()
 
     async def send_photo(self, path: str, text=None,):
         promt = db.get_promt()
@@ -85,6 +86,50 @@ class Calculator:
 Так что подготовься, Аня, впереди много интересного! Мы будем смеяться, учиться и, конечно же, худеть. Вместе мы сделаем так, чтобы каждая калория считалась и каждый прием пищи приближал тебя к цели.
 А теперь давай действовать! Нажми на кнопку ниже и приступим к созданию новой, еще более замечательной версии тебя. Помни, Аня, каждый шаг вперед – это шаг к твоему успеху. Готова начать? Тогда вперед к приключениям в мире здорового питания и идеальной фигуры!'''},
             {"role": "user", "content": food_data.__repr__()+user.__repr__()}]
+        response = self.openai.chat.completions.create(
+            model="gpt-3.5-turbo",
+            messages=messages,)
+        return response.choices[0].message.content.strip()
+
+    async def create_daily_mail_text(self, user: User, dish_list: List[FoodData]):
+        dishes_str = None
+        if dish_list:
+            dishes = [
+                f"Блюдо: {dish.dish} Каллорий: {dish.calories}" for dish in dish_list]
+            dishes_str = "\n".Join(dishes)
+        messages = [
+            {"role": "system", "content":
+                '''Ты профессиональный нутрициолог и мотиватор, твоя задача на основании съеденного вчера (ДАННЫЕ О ВЧЕРАШНЕЙ ЕДЕ), параметров клиента (ДАННЫЕ ПОЛЬЗООВАТЕЛЯ) и его целей (ЦЕЛЬ) написать мотивирующее письмо клиенту, которое будет подталкивать его к своей цели'''},
+            {"role": "user", "content": f"""
+             съедено вчера: {dishes_str}
+
+             данные пользователя:{user.__repr__()}
+            
+             цель:{user.goal}
+             
+             """}]
+        response = self.openai.chat.completions.create(
+            model="gpt-3.5-turbo",
+            messages=messages,)
+        return response.choices[0].message.content.strip()
+
+    async def create_weekly_mail_text(self, user: User, dish_list: List[FoodData]):
+        dishes_str = None
+        if dish_list:
+            dishes = [
+                f"Блюдо: {dish.dish} Каллорий: {dish.calories}" for dish in dish_list]
+            dishes_str = "\n".Join(dishes)
+        messages = [
+            {"role": "system", "content":
+                '''Ты профессиональный нутрициолог и мотиватор, твоя задача на основании недельного рациона (ДАННЫЕ О ЕДЕ ЗА НЕДЕЛЮ), параметров клиента (ДАННЫЕ ПОЛЬЗООВАТЕЛЯ) и его целей (ЦЕЛЬ) написать мотивирующее письмо клиенту, которое расскажет клиенту о положении дел, как он двигается к своей цели и нужно ли что-то менять для ее достижения'''},
+            {"role": "user", "content": f"""
+             съедено за неделю: {dishes_str}
+
+             данные пользователя:{user.__repr__()}
+            
+             цель:{user.goal}
+             
+             """}]
         response = self.openai.chat.completions.create(
             model="gpt-3.5-turbo",
             messages=messages,)

@@ -25,7 +25,7 @@ class Database:
                         username TEXT,
                         has_access BOOL DEFAULT false,
                         role TEXT DEFAULT 'USER',
-                        free_diary_records INT DEFAULT 3,
+                        free_diary_records INT DEFAULT 30,
                         weight INT,
                         height INT,
                         age INT,
@@ -54,6 +54,7 @@ class Database:
                         );"""
             cursor.execute(create)
             self.connection.commit()
+
         with self.connection.cursor() as cursor:
             create = """CREATE TABLE IF NOT EXISTS Promt
                         (id INT PRIMARY KEY AUTO_INCREMENT,
@@ -155,6 +156,20 @@ class Database:
                     result += int(r[4])
 
         return result
+
+    def get_amount_yesterday_records(self, telegram_id):
+        self.connection.ping()
+        with self.connection.cursor() as cursor:
+            cursor.execute(
+                """SELECT * FROM Records 
+                WHERE Month(date) = Month(DATE(NOW()))
+                AND Year(date) = Year(DATE(NOW()-1))
+                AND Date(date)= Date(DATE(NOW()-1))
+                and telegram_id=%s ORDER BY date""", (telegram_id))
+            res = cursor.fetchall()
+            print(res)
+
+        return [Record(dish) for dish in res]
 
     @staticmethod
     def add_one_month(orig_date):
