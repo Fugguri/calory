@@ -19,8 +19,10 @@ class Message_scheduler():
         self.scheduler.start()
 
     async def start_scheduler(self):
-        self.scheduler.add_job(self.create_daily_messaging_scheduler)
-        self.scheduler.add_job(self.create_weekly_messaging_scheduler)
+        self.scheduler.add_job(
+            self.create_daily_messaging_scheduler, 'cron', hour=8, minute=0)
+        self.scheduler.add_job(
+            self.create_weekly_messaging_scheduler, 'cron', hour=8, minute=0)
         # self.scheduler.add_job(self.test_mailing)
 
     async def create_daily_messaging_scheduler(self):
