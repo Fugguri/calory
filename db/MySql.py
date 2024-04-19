@@ -157,19 +157,52 @@ class Database:
 
         return result
 
-    def get_amount_yesterday_records(self, telegram_id):
+    def get_user_with_yesterday_records(self) -> UserWithYesterdayRecords:
         self.connection.ping()
+        result: List[UserWithYesterdayRecords] = None
         with self.connection.cursor() as cursor:
-            cursor.execute(
-                """SELECT * FROM Records 
-                WHERE Month(date) = Month(DATE(NOW()))
-                AND Year(date) = Year(DATE(NOW()-1))
-                AND Date(date)= Date(DATE(NOW()-1))
-                and telegram_id=%s ORDER BY date""", (telegram_id))
-            res = cursor.fetchall()
-            print(res)
+            cursor.execute("SELECT * FROM Users")
+            users = cursor.fetchall()
+            users = [User(user) for user in users]
+            for user in users:
 
-        return [Record(dish) for dish in res]
+                cursor.execute(
+                    """SELECT * FROM Records 
+                    WHERE Month(date) = Month(DATE(NOW()))
+                    AND Year(date) = Year(DATE(NOW()-1))
+                    AND Date(date)= Date(DATE(NOW()-1))
+                    and telegram_id=%s ORDER BY date
+                    """, (user.telegram_id))
+                records = cursor.fetchall()
+                records = [Record(record) for record in records]
+                result.append(UserWithYesterdayRecords(
+                    user=user, records=records))
+
+        return result
+
+    def get_user_with_weekly_records(self) -> UserWithYesterdayRecords:
+        self.connection.ping()
+        result: List[UserWithYesterdayRecords] = None
+        with self.connection.cursor() as cursor:
+            cursor.execute("SELECT * FROM Users")
+
+            users = cursor.fetchall()
+            users = [User(*user) for user in users]
+
+            for user in users:
+
+                cursor.execute(
+                    """SELECT * FROM Records 
+                    WHERE Month(date) = Month(DATE(NOW()))
+                    AND Year(date) = Year(DATE(NOW()-7))
+                    AND Date(date)= Date(DATE(NOW()-7))
+                    and telegram_id=%s ORDER BY date
+                    """, (user.telegram_id))
+                records = cursor.fetchall()
+                records = [Record(record) for record in records]
+                result.append(UserWithYesterdayRecords(
+                    user=user, records=records))
+        return result
 
     @staticmethod
     def add_one_month(orig_date):

@@ -46,10 +46,11 @@ async def remind_daily(message: types.Message, state: FSMContext):
     db: Database = ctx_data.get()['db']
     # for user in users:
     #     ...
+
     user = db.get_user(message.from_user.id)
     dishes_list = db.get_amount_yesterday_records(message.from_user.id) or []
-    print(dishes_list)
     text = await calculator.create_daily_mail_text(user=user, dish_list=dishes_list)
+
     await message.answer(text)
 
 
@@ -62,9 +63,9 @@ async def remind_weekly(message: types.Message, state: FSMContext):
     #     ...
 
     user = db.get_user(message.from_user.id)
-
     dishes_list = db.get_amount_yesterday_records(message.from_user.id) or []
     text = await calculator.create_daily_mail_text(user=user, dish_list=dishes_list)
+
     await message.answer(text)
 
 

@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 import datetime
+from typing import List
 
 
 @dataclass
@@ -87,3 +88,15 @@ class Record:
 
     def __repr__(self):
         return f"ПРОМОКОД:{self.code}\nПРОЦЕНТЫ: {self.percent}%\nИСПОЛЬЗОВАНО: {self.amount}"
+
+
+@dataclass
+class UserWithYesterdayRecords:
+    user: User
+    records: List[Record]
+
+
+@dataclass
+class UserWithWeeklyRecords:
+    user: User
+    records: List[Record]
