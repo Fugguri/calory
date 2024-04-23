@@ -35,7 +35,8 @@ class Database:
                         daily_calory INT,
                         discount INT DEFAULT 0,
                         subscription DATE,
-                        name TEXT
+                        name TEXT,
+                        score INT
                         );"""
             cursor.execute(create)
             self.connection.commit()
@@ -172,7 +173,7 @@ class Database:
                     AND Year(date) = Year(DATE(NOW()-1))
                     AND Date(date)= Date(DATE(NOW()-1))
                     and telegram_id=%s ORDER BY date
-                    """, (user.telegram_id))
+                    """, (user.user_id))
                 records = cursor.fetchall()
                 records = [Record(record) for record in records]
                 result.append(UserWithYesterdayRecords(
@@ -197,7 +198,7 @@ class Database:
                     AND Year(date) = Year(DATE(NOW()-7))
                     AND Date(date)= Date(DATE(NOW()-7))
                     and telegram_id=%s ORDER BY date
-                    """, (user.telegram_id))
+                    """, (user.user_id))
                 records = cursor.fetchall()
                 records = [Record(record) for record in records]
                 result.append(UserWithYesterdayRecords(

@@ -22,6 +22,7 @@ class User:
     subscription: datetime.date
     free_diary_records: int
     name: str
+    score: int
 
     def __repr__(self) -> str:
         return f"""<b>Имя</b>:{self.name}
@@ -58,6 +59,7 @@ class FoodData:
     grams: str = None
     carbs: str = None
     fats: str = None
+    score: int = None
 
     def __repr__(self):
         return f"Блюдо:{self.dish}\nБелки:{self.protein}\nКаллории:{self.calories}\n" \

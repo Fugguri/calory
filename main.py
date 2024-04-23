@@ -1,17 +1,21 @@
+import sys
+import openai
 import asyncio
 import logging
-import openai
-import sys
 from db.MySql import Database
 # from db.sqlite_connection import Database
+
 from config.config import load_config
+
 from keyboards.keyboards import Keyboards
+
 from handlers.users import register_user_handlers
 from handlers.admin import register_admin_handlers
 from handlers.education import register_education_handlers
 
 from middlewares.environment import EnvironmentMiddleware
 from middlewares import SubscriptionMiddleware
+
 from aiogram import Bot, Dispatcher, utils
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
 from aiogram.contrib.middlewares.logging import LoggingMiddleware
