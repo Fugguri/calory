@@ -160,7 +160,7 @@ class Database:
 
     def get_user_with_yesterday_records(self) -> UserWithYesterdayRecords:
         self.connection.ping()
-        result: List[UserWithYesterdayRecords] = None
+        result: List[UserWithYesterdayRecords] = []
         with self.connection.cursor() as cursor:
             cursor.execute("SELECT * FROM Users")
             users = cursor.fetchall()
@@ -183,7 +183,7 @@ class Database:
 
     def get_user_with_weekly_records(self) -> UserWithYesterdayRecords:
         self.connection.ping()
-        result: List[UserWithYesterdayRecords] = None
+        result: List[UserWithYesterdayRecords] = []
         with self.connection.cursor() as cursor:
             cursor.execute("SELECT * FROM Users")
 
