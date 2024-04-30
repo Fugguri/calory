@@ -12,6 +12,8 @@ from keyboards.keyboards import Keyboards
 
 calculator = _openai.Calculator()
 
+user_food_data = {}
+
 
 async def start(message: types.Message, state: FSMContext):
     cfg: Config = ctx_data.get()['config']
@@ -74,7 +76,7 @@ async def wait_photo(message: types.Message, state: FSMContext):
     # path = await message.photo[0].download()
     await state.set_state("wait_photo_description")
     await state.update_data(photo=message.photo[0])
-    await message.answer("Отправиьте название блюда или описание, для компонентов")
+    await message.answer("Отправьте название блюда или описание, для компонентов")
 
 
 async def wait_photo_description(message: types.Message, state: FSMContext):
@@ -84,12 +86,16 @@ async def wait_photo_description(message: types.Message, state: FSMContext):
     photo = await state.get_data("photo")
     path = await photo["photo"].download()
     mes = await message.answer("Веду подсчет...")
-    result: str = await calculator.send_photo(path.name, message.text)
+    user = db.get_user(message.from_user.id)
+    result: str = await calculator.send_photo(path.name, message.text, user.daily_calory)
     food_data = extract_food_data(result)
+    print(food_data)
     markup = await kb.back_kb("user")
     if food_data.calories != "Неизвестно":
         markup = await kb.add_diary_record_kb(food_data)
     await mes.delete()
+    user_food_data[message.from_user.id] = food_data
+
     await message.answer(result, reply_markup=markup)
     await state.finish()
 
@@ -106,6 +112,7 @@ async def add_record_to_diary(callback: types.CallbackQuery, state: FSMContext, 
     grams = callback_data.get("gr")
     carbs = callback_data.get("carbs")
     fats = callback_data.get("fats")
+    score = callback_data.get("score")
     food_data = FoodData(
         dish=dish,
         protein=protein,
@@ -113,16 +120,22 @@ async def add_record_to_diary(callback: types.CallbackQuery, state: FSMContext, 
         grams=grams,
         carbs=carbs,
         fats=fats,
+        score=score
     )
-
+    food_data = user_food_data[callback.from_user.id]
+    print(food_data)
     db.add_diary_record(callback.from_user.id, food_data)
-    amount_daily_calory = db.get_amount_daily_records(callback.from_user.id)
+    amount_daily_score = db.get_amount_daily_records(callback.from_user.id)
     user: User = db.get_user(callback.from_user.id)
     if not user.subscription:
         db.update_free_diary_records(callback.from_user.id)
     await callback.message.answer("Добавлено в дневник")
-    if amount_daily_calory > user.daily_calory:
-        await callback.message.answer(f"Внимание!!!\nКалорий на сегодня уже достаточно.\n{amount_daily_calory}/{user.daily_calory}")
+    result = ''
+    if amount_daily_score > 20:
+        result += f"Внимание!!!\n Вы набрали достаточно баллов на сегодня!.\n Набрано сегодня: {amount_daily_score}/20 баллов"
+    else:
+        result += f"\nНабрано сегодня: {amount_daily_score}/20 баллов"
+    await callback.message.answer(result)
 
 
 async def add_record_to_errors(callback: types.CallbackQuery, state: FSMContext, callback_data: dict):
@@ -151,7 +164,7 @@ async def add_record_to_errors(callback: types.CallbackQuery, state: FSMContext,
 
     await callback.message.answer("Данные об ошибке добавлены.")
     if amount_daily_calory > user.daily_calory:
-        await callback.message.answer(f"Внимание!!!\nКалорий на сегодня уже достаточно.\n{amount_daily_calory}/{user.daily_calory}")
+        await callback.message.answer(f"Внимание!!!\n Вы набрали достаточно баллов на сегодня!.\n Набрано сегодня: {amount_daily_score}/20 баллов")
 
 
 async def diary(message: types.Message, state: FSMContext):
@@ -161,13 +174,13 @@ async def diary(message: types.Message, state: FSMContext):
     user: User = db.get_user(message.from_user.id)
     text = "<b><i>Ваши данные</i></b>:\n"
     await state.finish()
-    amount_daily_calory = db.get_amount_daily_records(message.from_user.id)
+    amount_daily_score = db.get_amount_daily_records(message.from_user.id)
 
     result = text+user.__repr__()
-    if amount_daily_calory > user.daily_calory:
-        result += f"Внимание!!!\nКалорий на сегодня уже достаточно.\n{amount_daily_calory}/{user.daily_calory}"
+    if amount_daily_score > 20:
+        result += f"Внимание!!!\nКалорий вы набрали уже .\n{amount_daily_score}/20 баллов"
     else:
-        result += f"\nНабрано сегодня: {amount_daily_calory}/{user.daily_calory}"
+        result += f"\nНабрано сегодня: {amount_daily_score}/20 баллов"
     await message.answer(result)
 
 

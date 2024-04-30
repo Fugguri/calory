@@ -1,3 +1,4 @@
+from .users import user_food_data
 from aiogram import types
 from aiogram import Dispatcher
 from aiogram.dispatcher.handler import ctx_data
@@ -127,7 +128,7 @@ async def educate_confirm_settings(callback: types.CallbackQuery, state: FSMCont
     await state.finish()
 
 
-async def educate_cout_callory_photo(callback: types.CallbackQuery, state: FSMContext):
+async def educate_count_callory_photo(callback: types.CallbackQuery, state: FSMContext):
     kb: Keyboards = ctx_data.get()['keyboards']
     await state.set_state('educate wait photo')
     await callback.message.answer("Отправь фото для анализа БЖУ.")
@@ -153,9 +154,11 @@ async def educate_wait_photo_description(message: types.Message, state: FSMConte
     path = await photo["photo"].download()
     mes = await message.answer("Веду подсчет...")
     user = db.get_user(message.from_user.id)
-    result: str = await calculator.send_photo(path.name, message.text)
+
+    result: str = await calculator.send_photo(path.name, message.text, user.daily_calory)
     print(result)
     food_data = extract_food_data(result)
+    user_food_data[message.from_user.id] = food_data
     markup = await kb.back_kb("user")
     if food_data.calories != "Неизвестно":
         markup = await kb.add_diary_record_kb(food_data)
@@ -192,7 +195,7 @@ def register_education_handlers(dp: Dispatcher, kb: Keyboards):
     # dp.register_callback_query_handler(
     #     add_record_to_errors, kb.add_dish_to_error_list_cd.filter(), state="*")
     dp.register_callback_query_handler(
-        educate_cout_callory_photo, lambda x: x.data == "education_count_callory", state="*")
+        educate_count_callory_photo, lambda x: x.data == "education_count_callory", state="*")
 
     dp.register_message_handler(educate_wait_photo,
                                 content_types=[types.ContentType.PHOTO,

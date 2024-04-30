@@ -51,7 +51,8 @@ class Database:
                         grams TEXT,
                         carbs TEXT,
                         fats TEXT,
-                        date TEXT
+                        date TEXT,
+                        score INT
                         );"""
             cursor.execute(create)
             self.connection.commit()
@@ -114,9 +115,10 @@ class Database:
             self.connection.close()
 
     def add_diary_record(self, telegram_id, food_data: FoodData):
+        print(food_data)
         self.connection.ping()
         with self.connection.cursor() as cursor:
-            cursor.execute("INSERT IGNORE INTO Records (telegram_id,dish,protein,calories,grams,carbs,fats,date) VALUES (%s, %s, %s,%s, %s, %s, %s, %s) ",
+            cursor.execute("INSERT IGNORE INTO Records (telegram_id,dish,protein,calories,grams,carbs,fats,date,score) VALUES (%s, %s, %s,%s, %s, %s, %s, %s,%s) ",
                            (telegram_id,
                             food_data.dish,
                             food_data.protein,
@@ -124,7 +126,8 @@ class Database:
                             food_data.grams,
                             food_data.carbs,
                             food_data.fats,
-                            str(datetime.datetime.now())))
+                            str(datetime.datetime.now()),
+                            food_data.score))
             self.connection.commit()
             self.connection.close()
 
@@ -151,10 +154,13 @@ class Database:
                 AND Date(date)= Date(DATE(NOW()))
                 and telegram_id=%s ORDER BY date""", (telegram_id))
             res = cursor.fetchall()
+            print(res)
+            datas: List[Record] = [Record(*data)for data in res]
+            print(datas)
             result = 0
-            for r in res:
-                if r[4]:
-                    result += int(r[4])
+            for data in datas:
+                if data.score:
+                    result += int(data.score)
 
         return result
 

@@ -40,6 +40,7 @@ def extract_food_data(text_message):
     calories_match_1 = re.search(r'Калории: (\d+)', text_message)
     calories_match_2 = re.search(r'Калории: (\d+)-(\d+)', text_message)
     grams_match = re.search(r'Грамм: (\d+)', text_message)
+    score_match = re.search(r'Баллы: (\d+)', text_message)
     average_calories = None
 
     if calories_match_2:
@@ -58,6 +59,7 @@ def extract_food_data(text_message):
         grams=grams_match.group(1) if grams_match else "Неизвестно",
         carbs=carbs_match.group(1) if carbs_match else "Неизвестно",
         fats=fats_match.group(1) if fats_match else "Неизвестно",
+        score=score_match.group(1) if score_match else "Неизвестно",
     )
 
     return food_data

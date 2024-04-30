@@ -34,8 +34,23 @@ class Calculator:
 
         # self.thread = self.openai.beta.threads.create()
 
-    async def send_photo(self, path: str, text=None,):
-        promt = db.get_promt()
+    async def send_photo(self, path: str, text=None, need_callory: str | int = None):
+        # promt = db.get_promt()
+        print(need_callory)
+        promt = f"""
+        Ты специалист по питанию, нутрициолог, твоя задача по фото определить состав БЖУ и каллориность вес  пищи и баллы от нормы всего баллов 20 определи сколько баллов исходя из общего количества нужных каллорий и каллорий, которые были получены с этого примема пищи. Результат выводи в таблицу. Вес определи приблизительно, пиши сразу в целом значении без диапазона. Не нужно писать вводную фразу, сразу выдавай таблицу.
+Пиши только в таком формате. Больше никакую информацию не пиши.
+Всего каллорий: {need_callory}
+Пример ответа:
+Блюдо: Название блюда
+Калории: Количество калорий
+Грамм: Общий вес порции
+Белки: Количество грамм
+Жиры: Количество грамм
+Углеводы: Количество грамм
+Баллы: Количество баллов
+        """
+
         with open(path, "rb") as image_file:
             encoded_image = base64.b64encode(image_file.read()).decode("utf-8")
             response = self.openai.chat.completions.create(
@@ -43,7 +58,7 @@ class Calculator:
                 messages=[
                     {"role": "user",
                         "content": [
-                            {"type": "text", "text": promt[0]}
+                            {"type": "text", "text": promt}
                         ]
                      },
                     {

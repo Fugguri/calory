@@ -62,7 +62,7 @@ class FoodData:
     score: int = None
 
     def __repr__(self):
-        return f"Блюдо:{self.dish}\nБелки:{self.protein}\nКаллории:{self.calories}\n" \
+        return f"Блюдо:{self.dish}\nБелки:{self.protein}\nБаллов:{self.score}\n" \
                f"Граммы:{self.grams}\nУглеводы:{self.carbs}\nЖиры:{self.fats}"
 
 
@@ -80,6 +80,7 @@ class Promo:
 @dataclass
 class Record:
     id: str | int = None
+    telegram_id: str | int = None
     dish: str = None
     protein: str = None
     calories: str = None
@@ -87,6 +88,7 @@ class Record:
     carbs: str = None
     fats: str = None
     date: datetime.datetime | None = None
+    score: int | str = None
 
     # def __repr__(self):
     #     return f"ПРОМОКОД:{self.code}\nПРОЦЕНТЫ: {self.percent}%\nИСПОЛЬЗОВАНО: {self.amount}"
