@@ -164,7 +164,7 @@ class Database:
         with self.connection.cursor() as cursor:
             cursor.execute("SELECT * FROM Users")
             users = cursor.fetchall()
-            users = [User(user) for user in users]
+            users = [User(*user) for user in users]
             for user in users:
 
                 cursor.execute(

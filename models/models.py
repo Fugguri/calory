@@ -88,8 +88,8 @@ class Record:
     fats: str = None
     date: datetime.datetime | None = None
 
-    def __repr__(self):
-        return f"ПРОМОКОД:{self.code}\nПРОЦЕНТЫ: {self.percent}%\nИСПОЛЬЗОВАНО: {self.amount}"
+    # def __repr__(self):
+    #     return f"ПРОМОКОД:{self.code}\nПРОЦЕНТЫ: {self.percent}%\nИСПОЛЬЗОВАНО: {self.amount}"
 
 
 @dataclass
