@@ -21,10 +21,10 @@ class Message_scheduler():
     async def start_scheduler(self):
         self.scheduler.add_job(
             self.create_daily_messaging_scheduler,
-            'cron', hour=8, minute=0
+            'cron', hour=9, minute=0
         )
-        self.scheduler.add_job(
-            self.create_weekly_messaging_scheduler, 'cron', hour=8, minute=0)
+        # self.scheduler.add_job(
+        # self.create_weekly_messaging_scheduler, 'cron', hour=8, minute=0)
         # self.scheduler.add_job(self.test_mailing)
 
     async def create_daily_messaging_scheduler(self):
@@ -33,19 +33,19 @@ class Message_scheduler():
         for user_with_records in users_with_records:
             if not user_with_records.user.daily_calory:
                 continue
-            # try:
-            #     text = await self.calculator.create_daily_mail_text(
-            #         user=user_with_records.user,
-            #         dish_list=user_with_records.dishes_list
-            #     )
+            try:
+                text = await self.calculator.create_daily_mail_text(
+                    user=user_with_records.user,
+                    dish_list=user_with_records.dishes_list
+                )
 
-            #     await self.bot.send_message(
-            #         chat_id=user_with_records.user.user_id,
-            #         text=text
-            #     )
+                await self.bot.send_message(
+                    chat_id=user_with_records.user.user_id,
+                    text=text
+                )
 
-            # except Exception as ex:
-            #     print(ex)
+            except Exception as ex:
+                print(ex)
         else:
             print("Daily mailing done")
 
