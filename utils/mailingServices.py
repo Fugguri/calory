@@ -36,7 +36,7 @@ class Message_scheduler():
             try:
                 text = await self.calculator.create_daily_mail_text(
                     user=user_with_records.user,
-                    dish_list=user_with_records.dishes_list
+                    dish_list=user_with_records.records
                 )
 
                 await self.bot.send_message(
@@ -59,7 +59,7 @@ class Message_scheduler():
             try:
                 text = await self.calculator.create_daily_mail_text(
                     user=user_with_records.user,
-                    dish_list=user_with_records.dishes_list
+                    dish_list=user_with_records.records
                 )
 
                 await self.bot.send_message(
