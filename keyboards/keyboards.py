@@ -11,7 +11,7 @@ class Keyboards:
         self.start_cd = CallbackData("start", "character_id")
         self.admin_cd = CallbackData("mailing", "command")
         self.mailing_cd = CallbackData("admin", "command")
-        self.add_calory_diary_cd = CallbackData('d'
+        self.add_calory_diary_cd = CallbackData('d', "amount"
                                                 )
         self.add_dish_to_error_list_cd = CallbackData("dish", "amount")
         self.confirm_promo_cd = CallbackData("promo", "code", "percent")
