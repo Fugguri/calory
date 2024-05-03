@@ -81,7 +81,7 @@ class Keyboards:
                    #     score=food_data.score,
                )))
         kb.add(InlineKeyboardButton(text="Неправильный подсчет грам",
-               callback_data=self.add_dish_to_error_list_cd.new(amount=food_data.dish)))
+               callback_data=self.add_dish_to_error_list_cd.new(amount=food_data.calories)))
         return kb
 
     async def sex_kb(self):
