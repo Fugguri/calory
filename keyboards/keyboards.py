@@ -72,7 +72,7 @@ class Keyboards:
         kb = InlineKeyboardMarkup()
         kb.add(InlineKeyboardButton(text="Добавить запись",
                callback_data=self.add_calory_diary_cd.new(
-                   d=food_data.dish,
+                   amount=food_data.calories,
                    #      cal=food_data.calories,
                    #      pr=food_data.protein,
                    #      gr=food_data.grams,
