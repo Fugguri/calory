@@ -17,6 +17,7 @@ job_store = (
 
 
 message_scheduler: BaseScheduler = AsyncIOScheduler(
+    timezone='Europe/Moscow',
     jobstores={
         "default": job_store,
     },

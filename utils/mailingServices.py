@@ -6,6 +6,7 @@ from db import db
 from models.models import Record, User
 from ._openai import Calculator
 from .scheduler import message_scheduler, BaseScheduler
+import datetime
 
 
 class Message_scheduler():
@@ -15,13 +16,12 @@ class Message_scheduler():
         self.bot: Bot = bot
         self.scheduler: BaseScheduler = message_scheduler
         self.calculator: Calculator = Calculator()
-
         self.scheduler.start()
 
     async def start_scheduler(self):
         self.scheduler.add_job(
             self.create_daily_messaging_scheduler,
-            'cron', hour=9, minute=0
+            'cron', hour=8, minute=0
         )
         # self.scheduler.add_job(
         # self.create_weekly_messaging_scheduler, 'cron', hour=8, minute=0)
