@@ -7,6 +7,7 @@ from models.models import Record, User
 from ._openai import Calculator
 from .scheduler import message_scheduler, BaseScheduler
 import datetime
+from keyboards.keyboards import Keyboards
 
 
 class Message_scheduler():
@@ -17,6 +18,7 @@ class Message_scheduler():
         self.scheduler: BaseScheduler = message_scheduler
         self.calculator: Calculator = Calculator()
         self.scheduler.start()
+        self.keyboards = Keyboards()
 
     async def start_scheduler(self):
         self.scheduler.add_job(
@@ -41,7 +43,9 @@ class Message_scheduler():
 
                 await self.bot.send_message(
                     chat_id=user_with_records.user.user_id,
-                    text=text
+                    text=text,
+                    reply_markup=self.keyboards.start_kb()
+
                 )
 
             except Exception as ex:
@@ -64,7 +68,9 @@ class Message_scheduler():
 
                 await self.bot.send_message(
                     chat_id=user_with_records.user.user_id,
-                    text=text
+                    text=text,
+                    reply_markup=self.keyboards.start_kb()
+
                 )
 
             except Exception as ex:
@@ -84,7 +90,8 @@ class Message_scheduler():
             )
             message = await self.bot.send_message(
                 chat_id=user.user_id,
-                text=text
+                text=text,
+                reply_markup=self.keyboards.start_kb()
             )
         except Exception as ex:
             print(ex)
