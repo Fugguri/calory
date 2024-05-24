@@ -7,18 +7,19 @@ from models.models import Record, User
 from ._openai import Calculator
 from .scheduler import message_scheduler, BaseScheduler
 import datetime
+from config.config import C
 from keyboards.keyboards import Keyboards
 
 
 class Message_scheduler():
 
-    def __init__(self, bot: Bot = None) -> None:
+    def __init__(self, bot: Bot = None, keyboards: Keyboards = None) -> None:
         self.db = db
         self.bot: Bot = bot
         self.scheduler: BaseScheduler = message_scheduler
         self.calculator: Calculator = Calculator()
         self.scheduler.start()
-        self.keyboards = Keyboards()
+        self.keyboards = keyboards
 
     async def start_scheduler(self):
         self.scheduler.add_job(
