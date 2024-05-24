@@ -54,7 +54,7 @@ async def main():
     dp = Dispatcher(bot, storage=storage)
     db.cbdt()
     kbs = Keyboards(config)
-    ms = Message_scheduler(bot=bot, kbs=Keyboards(config))
+    ms = Message_scheduler(bot=bot, keyboards=kbs)
 
     bot['keyboards'] = kbs
     bot['config'] = config
