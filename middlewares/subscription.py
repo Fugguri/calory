@@ -29,6 +29,7 @@ class SubscriptionMiddleware(BaseMiddleware):
         super().__init__()
 
     async def on_process_message(self, message: types.Message, data: dict):
+        ...
         # if message.text == "Подсчет каллорий":
 
         #     subscription = is_subscription(message.from_user.id)
