@@ -6,8 +6,6 @@ from db import db
 from models.models import Record, User
 from ._openai import Calculator
 from .scheduler import message_scheduler, BaseScheduler
-import datetime
-from config.config import C
 from keyboards.keyboards import Keyboards
 
 
