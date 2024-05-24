@@ -29,13 +29,13 @@ class SubscriptionMiddleware(BaseMiddleware):
         super().__init__()
 
     async def on_process_message(self, message: types.Message, data: dict):
-        if message.text == "Подсчет каллорий":
+        # if message.text == "Подсчет каллорий":
 
-            subscription = is_subscription(message.from_user.id)
-            if not subscription and is_have_free_diary_records(message.from_user.id):
-                return
+        #     subscription = is_subscription(message.from_user.id)
+        #     if not subscription and is_have_free_diary_records(message.from_user.id):
+        #         return
 
-            if not subscription:
-                await message.answer(text='Чтобы пользоваться сервисом приобретите подписку.\
-                    \nДля того чтобы приобрести подписку перейдите по кнопке "Подписка"')
-                raise CancelHandler()
+        #     if not subscription:
+        #         await message.answer(text='Чтобы пользоваться сервисом приобретите подписку.\
+        #             \nДля того чтобы приобрести подписку перейдите по кнопке "Подписка"')
+        #         raise CancelHandler()
