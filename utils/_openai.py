@@ -54,7 +54,7 @@ class Calculator:
         with open(path, "rb") as image_file:
             encoded_image = base64.b64encode(image_file.read()).decode("utf-8")
             response = self.openai.chat.completions.create(
-                model="gpt-4-vision-preview",
+                model="gpt-4o",
                 messages=[
                     {"role": "user",
                         "content": [

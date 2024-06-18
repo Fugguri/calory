@@ -5,24 +5,24 @@ from typing import List
 
 @dataclass
 class User:
-    id: int
-    user_id: int
-    full_name: str
-    username: str
-    has_access: bool
-    role: str
-    weight: int
-    height: int
-    age: int
-    sex: str
-    activity: str
-    goal: str
-    daily_calory: str
-    discount: int
-    subscription: datetime.date
-    free_diary_records: int
-    name: str
-    score: int
+    id: int | None = None
+    user_id: int = None
+    full_name: str = None
+    username: str = None
+    has_access: bool | None = None
+    role: str | None = None
+    weight: int | None = None
+    height: int | None = None
+    age: int | None = None
+    sex: str | None = None
+    activity: str | None = None
+    goal: str | None = None
+    daily_calory: str | None = None
+    discount: int | None = None
+    subscription: datetime.date | None = None
+    free_diary_records: int | None = None
+    name: str | None = None
+    score: int | None = None
 
     def __repr__(self) -> str:
         return f"""<b>Имя</b>:{self.name}
@@ -38,13 +38,13 @@ class User:
 
 @dataclass
 class Settings:
-    name: str
-    height: int
-    weight: int
-    age: int
-    sex: str
-    activity: str
-    goal: str
+    name: str | None = None
+    height: int | None = None
+    weight: int | None = None
+    age: int | None = None
+    sex: str | None = None
+    activity: str | None = None
+    goal: str | None = None
 
     def __repr__(self) -> str:
         return f"Имя:{self.name}\nРост:{self.height}\nВес:{self.weight}\nВозраст:{self.age}\nПол:{self.sex}\nАктивность:{self.activity}\nЦель:{self.goal} "

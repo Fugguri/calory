@@ -153,8 +153,13 @@ async def educate_wait_photo_description(message: types.Message, state: FSMConte
     photo = await state.get_data("photo")
     path = await photo["photo"].download()
     mes = await message.answer("Веду подсчет...")
-    user = db.get_user(message.from_user.id)
-
+    print(message.from_user.id)
+    try:
+        user: User = db.get_user(message.from_user.id)
+    except:
+        markup = await kb.wait_user_data_kb()
+        await message.answer("Невозможно получить данные.Пройдите регистрацию заново.", reply_markup=markup)
+        return
     result: str = await calculator.send_photo(path.name, message.text, user.daily_calory)
     print(result)
     food_data = extract_food_data(result)

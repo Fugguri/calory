@@ -22,7 +22,13 @@ async def start(message: types.Message, state: FSMContext):
     try:
         db.get_user(message.from_user.id)
     except:
-        ...
+        user = User(id=message.from_user.id,
+                    full_name=message.from_user.full_name,
+                    username=message.from_user.username,
+                    has_access=True,
+                    role='USER',
+                    )
+        db.add_user(user)
 
     markup = await kb.wait_user_data_kb()
     await message.answer(text=cfg.misc.messages.start, reply_markup=markup)
@@ -37,7 +43,6 @@ async def calculate_calory(message: types.Message, state: FSMContext):
     kb: Keyboards = ctx_data.get()['keyboards']
     db: Database = ctx_data.get()['db']
 
-    user = db.get_user(message.from_user.id)
     await message.answer("Отправьте фотографию для подсчета каллорий.")
     await state.set_state("wait photo")
 
@@ -86,7 +91,12 @@ async def wait_photo_description(message: types.Message, state: FSMContext):
     photo = await state.get_data("photo")
     path = await photo["photo"].download()
     mes = await message.answer("Веду подсчет...")
-    user = db.get_user(message.from_user.id)
+    try:
+        user: User = db.get_user(message.from_user.id)
+    except:
+        markup = await kb.wait_user_data_kb()
+        await message.answer("Невозможно получить данные.Пройдите регистрацию заново.", reply_markup=markup)
+        return
     result: str = await calculator.send_photo(path.name, message.text, user.daily_calory)
     food_data = extract_food_data(result)
     print(food_data)
@@ -126,9 +136,12 @@ async def add_record_to_diary(callback: types.CallbackQuery, state: FSMContext, 
     print(food_data)
     db.add_diary_record(callback.from_user.id, food_data)
     amount_daily_score = db.get_amount_daily_records(callback.from_user.id)
-    user: User = db.get_user(callback.from_user.id)
-    if not user.subscription:
-        db.update_free_diary_records(callback.from_user.id)
+    try:
+        user: User = db.get_user(callback.from_user.id)
+    except:
+        markup = await kb.wait_user_data_kb()
+        await callback.message.answer("Невозможно получить данные.Пройдите регистрацию заново.", reply_markup=markup)
+        return
     await callback.message.answer("Добавлено в дневник")
     result = ''
     if amount_daily_score > 20:
@@ -164,14 +177,19 @@ async def add_record_to_errors(callback: types.CallbackQuery, state: FSMContext,
 
     await callback.message.answer("Данные об ошибке добавлены.")
     if amount_daily_calory > user.daily_calory:
-        await callback.message.answer(f"Внимание!!!\n Вы набрали достаточно баллов на сегодня!.\n Набрано сегодня: {amount_daily_score}/20 баллов")
+        await callback.message.answer(f"Внимание!!!\n Вы набрали достаточно баллов на сегодня!.\n Набрано сегодня: {amount_daily_calory}/20 баллов")
 
 
 async def diary(message: types.Message, state: FSMContext):
     cfg: Config = ctx_data.get()['config']
     kb: Keyboards = ctx_data.get()['keyboards']
     db: Database = ctx_data.get()['db']
-    user: User = db.get_user(message.from_user.id)
+    try:
+        user: User = db.get_user(message.from_user.id)
+    except:
+        markup = await kb.wait_user_data_kb()
+        await message.answer("Невозможно получить данные.Пройдите регистрацию заново.", reply_markup=markup)
+        return
     text = "<b><i>Ваши данные</i></b>:\n"
     await state.finish()
     amount_daily_score = db.get_amount_daily_records(message.from_user.id)
@@ -189,7 +207,17 @@ async def settings(message: types.Message, state: FSMContext):
     kb: Keyboards = ctx_data.get()['keyboards']
     db: Database = ctx_data.get()['db']
     markup = await kb.back_kb("user")
-    await message.answer("Введите свой рост", reply_markup=markup)
+    await message.answer("Как я могу к вам обращаться?", reply_markup=markup)
+    await state.set_state('wait name')
+
+
+async def wait_name(message: types.Message, state: FSMContext):
+    cfg: Config = ctx_data.get()['config']
+    kb: Keyboards = ctx_data.get()['keyboards']
+    db: Database = ctx_data.get()['db']
+    markup = await kb.back_kb("user")
+    await state.update_data(name=message.text)
+    await message.answer("Введите свой рост в см", reply_markup=markup)
     await state.set_state('wait height')
 
 
@@ -199,7 +227,7 @@ async def wait_height(message: types.Message, state: FSMContext):
     db: Database = ctx_data.get()['db']
     markup = await kb.back_kb("user")
     await state.update_data(height=message.text)
-    await message.answer("Введите свой вес", reply_markup=markup)
+    await message.answer("Введите свой вес в кг", reply_markup=markup)
     await state.set_state('wait weight')
 
 
@@ -260,6 +288,7 @@ async def confirm_settings(callback: types.CallbackQuery, state: FSMContext):
     kb: Keyboards = ctx_data.get()['keyboards']
     db: Database = ctx_data.get()['db']
     data = await state.get_data()
+    print(data)
     settings = Settings(**data)
     calory = calculate_calories(settings)
     db.update_user_data(callback.from_user.id, settings)
@@ -462,6 +491,7 @@ def register_user_handlers(dp: Dispatcher, kb: Keyboards):
     dp.register_message_handler(wait_height, state="wait height")
     dp.register_message_handler(wait_weight, state="wait weight")
     dp.register_message_handler(wait_age, state="wait age")
+    dp.register_message_handler(wait_name, state="wait name")
     dp.register_callback_query_handler(wait_sex, state="wait sex")
     dp.register_callback_query_handler(wait_goal, state="wait goal")
     dp.register_callback_query_handler(wait_activity, state="wait activity")
