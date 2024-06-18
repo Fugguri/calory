@@ -171,11 +171,14 @@ async def add_record_to_errors(callback: types.CallbackQuery, state: FSMContext,
         fats=fats,
 
     )
-    db.add_diary_record(callback.from_user.id, food_data)
-    amount_daily_calory = db.get_amount_daily_records(callback.from_user.id)
-    user: User = db.get_user(callback.from_user.id)
-
-    await callback.message.answer("Данные об ошибке добавлены.")
+    try:
+        db.add_diary_record(callback.from_user.id, food_data)
+        amount_daily_calory = db.get_amount_daily_records(
+            callback.from_user.id)
+        user: User = db.get_user(callback.from_user.id)
+        await callback.message.answer("Данные об ошибке добавлены.")
+    except:
+        await callback.message.answer("Данные об ошибке добавлены.")
     if amount_daily_calory > user.daily_calory:
         await callback.message.answer(f"Внимание!!!\n Вы набрали достаточно баллов на сегодня!.\n Набрано сегодня: {amount_daily_calory}/20 баллов")
 
