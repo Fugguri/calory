@@ -54,7 +54,7 @@ class Calculator:
         with open(path, "rb") as image_file:
             encoded_image = base64.b64encode(image_file.read()).decode("utf-8")
             response = self.openai.chat.completions.create(
-                model="gpt-4o",
+                model="gpt-4o-mini",
                 messages=[
                     {"role": "user",
                         "content": [
@@ -86,7 +86,7 @@ class Calculator:
                 "Скажи сколько каллорий нужно.Убери лишний текст. Формат ответа: Количество каллорий - 2100"},
             {"role": "user", "content": path}]
         response = self.openai.chat.completions.create(
-            model="gpt-3.5-turbo",
+            model="gpt-4o-mini",
             messages=messages,)
         return response.choices[0].message.content.strip()
 
@@ -146,6 +146,6 @@ class Calculator:
              
              """}]
         response = self.openai.chat.completions.create(
-            model="gpt-3.5-turbo",
+            model="gpt-4o-mini",
             messages=messages,)
         return response.choices[0].message.content.strip()
