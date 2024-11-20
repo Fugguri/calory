@@ -306,7 +306,7 @@ async def payment(message: types.Message, state: FSMContext):
     db: Database = ctx_data.get()['db']
 
     user = db.get_user(message.from_user.id)
-    summ = int(39900) * (100 - user.discount)/100
+    summ = round(int(39900) * (100 - user.discount)/100)
     PRICE = types.LabeledPrice(label='Подписка на месяц SlimFoto', amount=summ)
     await message.bot.send_invoice(
         message.chat.id,
