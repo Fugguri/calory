@@ -473,9 +473,8 @@ def register_user_handlers(dp: Dispatcher, kb: Keyboards):
         calculate_calory, regexp="Подсчет каллорий", state="*")
 
     dp.register_message_handler(payment, regexp="Подписка", state="*")
-    dp.register_callback_query_handler(
-        set_wait_promo_code, commands=[
-            "promocode"], state="*")
+    dp.register_message_handler(
+        set_wait_promo_code, commands=["promocode"], state="*")
     dp.register_message_handler(
         wait_promo_code, state="wait_promo_code")
     dp.register_callback_query_handler(
