@@ -418,14 +418,14 @@ async def confirm_bill(callback: types.CallbackQuery, state: FSMContext, callbac
             await callback.message.answer(f"ID telegram {str(user.user_id)} username: @{user.username}")
 
 
-async def set_wait_promo_code(callback: types.CallbackQuery, state: FSMContext):
+async def set_wait_promo_code(message: types.Message, state: FSMContext):
     cfg: Config = ctx_data.get()['config']
     kb: Keyboards = ctx_data.get()['keyboards']
     db: Database = ctx_data.get()['db']
 
     markup = await kb.back_kb("user")
     await state.set_state("wait_promo_code")
-    await callback.message.answer("Отправьте промокод", reply_markup=markup)
+    await message.answer("Отправьте промокод", reply_markup=markup)
 
 
 async def wait_promo_code(message: types.Message, state: FSMContext):
@@ -474,7 +474,8 @@ def register_user_handlers(dp: Dispatcher, kb: Keyboards):
 
     dp.register_message_handler(payment, regexp="Подписка", state="*")
     dp.register_callback_query_handler(
-        set_wait_promo_code, lambda x: x.data == "set_wait_promo_code", state="*")
+        set_wait_promo_code, commands=[
+            "promocode"], state="*")
     dp.register_message_handler(
         wait_promo_code, state="wait_promo_code")
     dp.register_callback_query_handler(
