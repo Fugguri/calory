@@ -43,7 +43,7 @@ class Message_scheduler():
                 await self.bot.send_message(
                     chat_id=user_with_records.user.user_id,
                     text=text,
-                    reply_markup=self.keyboards.start_kb()
+                    reply_markup=await self.keyboards.start_kb()
 
                 )
 
