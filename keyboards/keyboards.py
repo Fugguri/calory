@@ -34,8 +34,15 @@ class Keyboards:
     async def subscription_kb(self):
         kb = InlineKeyboardMarkup()
         kb.add(InlineKeyboardButton("Промокод", callback_data="set_wait_promo_code"),
-               InlineKeyboardButton("Отправить чек об оплате",
-                                    callback_data="set_send_bill"),
+               InlineKeyboardButton("Оплатить",
+                                    callback_data="send_invoice"),
+               )
+        return kb
+
+    async def pay_kb(self):
+        kb = InlineKeyboardMarkup()
+        kb.add(InlineKeyboardButton("Оплатить",
+                                    callback_data="send_invoice"),
                )
         return kb
 

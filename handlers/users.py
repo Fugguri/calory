@@ -300,16 +300,38 @@ async def confirm_settings(callback: types.CallbackQuery, state: FSMContext):
     await state.finish()
 
 
+DEFAULT_PRICE = 990  # в рублях, без копеек
+
+
 async def payment(message: types.Message, state: FSMContext):
     cfg: Config = ctx_data.get()['config']
     kb: Keyboards = ctx_data.get()['keyboards']
     db: Database = ctx_data.get()['db']
 
-    user = db.get_user(message.from_user.id)
-    summ = round(int(39900) * (100 - user.discount)/100)
+    markup = await kb.subscription_kb()
+    await message.answer(f"""Премиум Подписка 🌟
+Что вы получите:
+1. Доступ к сервису на 1 месяц
+2. Возможность по фото определять калорийность блюда
+3. Личный дневник в котором вы будете контролировать ежедневное потребление  калорий
+
+Стоимость месячной подписки: {DEFAULT_PRICE} рублей
+
+В ближайших обновлениях вы также получите:
+- Фитнес тренер под рукой. Ответит на все ваши вопросы, составит план тренировок по запросу.
+- Ежедневный мотиватор, будет напоминать о плановых тренировках и давать рекомендации по питанию.""", reply_markup=markup)
+
+
+async def send_invoice(callback: types.CallbackQuery, state: FSMContext):
+    cfg: Config = ctx_data.get()['config']
+    kb: Keyboards = ctx_data.get()['keyboards']
+    db: Database = ctx_data.get()['db']
+
+    user = db.get_user(callback.from_user.id)
+    summ = round(DEFAULT_PRICE * 100 * (100 - user.discount)/100)
     PRICE = types.LabeledPrice(label='Подписка на месяц SlimFoto', amount=summ)
-    await message.bot.send_invoice(
-        message.chat.id,
+    await callback.message.bot.send_invoice(
+        callback.message.chat.id,
         title="Подписка на SlimFoto",
         description="Подписка на 1 месяц",
         provider_token="390540012:LIVE:47486",
@@ -320,18 +342,6 @@ async def payment(message: types.Message, state: FSMContext):
         start_parameter='subscription',
         payload='Payload1',
     )
-    markup = await kb.subscription_kb()
-#     await message.answer(f"""Премиум Подписка 🌟
-# Что вы получите:
-# 1. Доступ к сервису на 1 месяц
-# 2. Возможность по фото определять калорийность блюда
-# 3. Личный дневник в котором вы будете контролировать ежедневное потребление  калорий
-
-# Стоимость месячной подписки: 390 рублей
-
-# В ближайших обновлениях вы также получите:
-# - Фитнес тренер под рукой. Ответит на все ваши вопросы, составит план тренировок по запросу.
-# - Ежедневный мотиватор, будет напоминать о плановых тренировках и давать рекомендации по питанию.""", reply_markup=markup)
 
 
 async def process_pre_checkout_query(pre_checkout_query: types.PreCheckoutQuery):
@@ -366,7 +376,7 @@ async def process_successful_payment(message: types.Message):
     db.set_month_subscription(message.from_user.id)
     await bot.send_message(
         message.chat.id,
-        "Вы успешно оплатили подписку, общайтесь без ограничений."
+        "Вы успешно оплатили подписку, пользуйтесь без ограничений."
     )
 
 
@@ -428,6 +438,16 @@ async def set_wait_promo_code(message: types.Message, state: FSMContext):
     await message.answer("Отправьте промокод", reply_markup=markup)
 
 
+async def set_callback_wait_promo_code(callback: types.CallbackQuery, state: FSMContext):
+    cfg: Config = ctx_data.get()['config']
+    kb: Keyboards = ctx_data.get()['keyboards']
+    db: Database = ctx_data.get()['db']
+
+    markup = await kb.back_kb("user")
+    await state.set_state("wait_promo_code")
+    await callback.message.answer("Отправьте промокод", reply_markup=markup)
+
+
 async def wait_promo_code(message: types.Message, state: FSMContext):
     cfg: Config = ctx_data.get()['config']
     kb: Keyboards = ctx_data.get()['keyboards']
@@ -441,8 +461,9 @@ async def wait_promo_code(message: types.Message, state: FSMContext):
     markup = await kb.subscription_kb()
     db.update_user_discount(message.from_user.id, promo.percent)
     await state.finish()
+    markup = await kb.pay_kb()
 
-    await message.answer(f"Промокод успешно применен, за вами закреплена скидка <b>{promo.percent}%</b>.")
+    await message.answer(f"Промокод успешно применен!\nЗа вами закреплена скидка <b>{promo.percent}%</b>.", reply_markup=markup)
 
 
 async def wait_text(message: types.Message, state: FSMContext):
@@ -511,6 +532,10 @@ def register_user_handlers(dp: Dispatcher, kb: Keyboards):
                                                ], state="wait photo")
     dp.register_message_handler(
         wait_photo_description, state="wait_photo_description")
+    dp.register_callback_query_handler(
+        set_callback_wait_promo_code, lambda x: x.data == "set_wait_promo_code")
+    dp.register_callback_query_handler(
+        send_invoice, lambda x: x.data == "send_invoice")
 
     dp.register_message_handler(
         process_successful_payment,
