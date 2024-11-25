@@ -328,7 +328,7 @@ async def send_invoice(callback: types.CallbackQuery, state: FSMContext):
     db: Database = ctx_data.get()['db']
 
     user = db.get_user(callback.from_user.id)
-    summ = round(DEFAULT_PRICE * 100 * (100 - user.discount)/100)
+    summ = round(DEFAULT_PRICE * 100 * (100 - user.discount or 100)/100)
     PRICE = types.LabeledPrice(label='Подписка на месяц SlimFoto', amount=summ)
     await callback.message.bot.send_invoice(
         callback.message.chat.id,
