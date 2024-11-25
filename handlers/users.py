@@ -418,7 +418,7 @@ async def confirm_bill(callback: types.CallbackQuery, state: FSMContext, callbac
     match callback_data.get("command"):
         case "confirm":
             db.set_month_subscription(user_id)
-            await callback.message.answer("Уведомление отпрвлено")
+            await callback.message.answer("Уведомление отправлено")
             await callback.bot.send_message(user_id, "Подписка подтверждена.")
         case "decline":
             await callback.bot.send_message(user_id, "Подписка отклонена, для уточнения причин свяжитесь с @son2421")
